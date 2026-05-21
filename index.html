@@ -1,0 +1,777 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2685.4">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+  </style>
+</head>
+<body>
+<p class="p1">&lt;!DOCTYPE html&gt;</p>
+<p class="p1">&lt;html lang="en"&gt;</p>
+<p class="p1">&lt;head&gt;</p>
+<p class="p1">&lt;meta charset="UTF-8"&gt;</p>
+<p class="p1">&lt;meta name="viewport" content="width=device-width,initial-scale=1"&gt;</p>
+<p class="p1">&lt;title&gt;DefSpend — Defense Contract Intelligence&lt;/title&gt;</p>
+<p class="p1">&lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"&gt;</p>
+<p class="p1">&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"&gt;&lt;/script&gt;</p>
+<p class="p1">&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"&gt;&lt;/script&gt;</p>
+<p class="p1">&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"&gt;&lt;/script&gt;</p>
+<p class="p1">&lt;style&gt;</p>
+<p class="p1">*{box-sizing:border-box;margin:0;padding:0}</p>
+<p class="p1">:root{</p>
+<p class="p1"><span class="Apple-converted-space">  </span>--bg:#07090f;--bg2:#0d1017;--bg3:#121520;--bg4:#181c28;--bg5:#1e2334;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>--border:#ffffff0e;--border2:#ffffff18;--border3:#ffffff28;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>--text:#dde2f0;--text2:#7e8aaa;--text3:#454e68;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>--blue:#4f8ef7;--blue2:#0f2a5c;--blue3:#1a3a7a;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>--green:#22d47a;--green2:#0a2e1a;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>--amber:#f5a623;--amber2:#3a2200;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>--red:#f05252;--red2:#3a0a0a;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>--purple:#a78bfa;--purple2:#1e1040;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>--orange:#fb923c;--orange2:#3a1500;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>--teal:#2dd4bf;--teal2:#0a2a28;</p>
+<p class="p1">}</p>
+<p class="p1">body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;font-size:13px;line-height:1.5;min-height:100vh;overflow-x:hidden}</p>
+<p class="p2"><br></p>
+<p class="p1">/* TOPBAR */</p>
+<p class="p1">.topbar{display:flex;align-items:center;gap:0;height:48px;border-bottom:1px solid var(--border2);background:var(--bg);position:sticky;top:0;z-index:100;padding:0 20px}</p>
+<p class="p1">.logo{display:flex;align-items:center;gap:9px;margin-right:24px;text-decoration:none}</p>
+<p class="p1">.logo-mark{width:26px;height:26px;border-radius:5px;background:var(--blue);display:flex;align-items:center;justify-content:center}</p>
+<p class="p1">.logo-mark i{color:#fff;font-size:14px}</p>
+<p class="p1">.logo-text{font-size:15px;font-weight:700;color:var(--text);letter-spacing:-.3px}</p>
+<p class="p1">.logo-tld{color:var(--text3);font-weight:400;font-size:12px}</p>
+<p class="p1">.nav-links{display:flex;gap:1px;flex:1}</p>
+<p class="p1">.nl{padding:5px 11px;border-radius:5px;cursor:pointer;color:var(--text2);font-size:12px;border:none;background:none;transition:.12s;white-space:nowrap;display:flex;align-items:center;gap:4px}</p>
+<p class="p1">.nl:hover{background:var(--bg4);color:var(--text)}</p>
+<p class="p1">.nl.active{background:var(--bg4);color:var(--blue);font-weight:500}</p>
+<p class="p1">.topbar-right{display:flex;align-items:center;gap:8px}</p>
+<p class="p1">.live-badge{display:flex;align-items:center;gap:5px;background:var(--green2);border:1px solid #22d47a22;color:var(--green);font-size:10px;padding:3px 9px;border-radius:20px;font-weight:500}</p>
+<p class="p1">.dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:blink 2s infinite}</p>
+<p class="p1">@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}</p>
+<p class="p2"><br></p>
+<p class="p1">/* TICKER TAPE */</p>
+<p class="p1">.ticker-tape{background:var(--bg2);border-bottom:1px solid var(--border);padding:0;height:32px;overflow:hidden;display:flex;align-items:center}</p>
+<p class="p1">.ticker-inner{display:flex;gap:0;animation:scroll 40s linear infinite;white-space:nowrap}</p>
+<p class="p1">.ticker-inner:hover{animation-play-state:paused}</p>
+<p class="p1">@keyframes scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}</p>
+<p class="p1">.tick-item{display:flex;align-items:center;gap:6px;padding:0 20px;border-right:1px solid var(--border);cursor:pointer}</p>
+<p class="p1">.tick-ticker{font-size:11px;font-weight:700;color:var(--text2)}</p>
+<p class="p1">.tick-price{font-size:12px;font-weight:600}</p>
+<p class="p1">.tick-chg{font-size:10px}</p>
+<p class="p1">.up{color:var(--green)}.dn{color:var(--red)}.neu{color:var(--text2)}</p>
+<p class="p2"><br></p>
+<p class="p1">/* HERO */</p>
+<p class="p1">.hero{background:var(--bg2);border-bottom:1px solid var(--border2);padding:14px 20px 0}</p>
+<p class="p1">.hero-row{display:flex;align-items:flex-end;gap:40px;margin-bottom:12px}</p>
+<p class="p1">.hero-main .label{font-size:10px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;margin-bottom:2px}</p>
+<p class="p1">.hero-main .bignum{font-size:40px;font-weight:800;letter-spacing:-2px;color:var(--blue);line-height:1}</p>
+<p class="p1">.hero-main .sub{font-size:11px;color:var(--text2);margin-top:3px}</p>
+<p class="p1">.hero-stats{display:flex;gap:24px;flex:1;justify-content:flex-end;padding-bottom:2px}</p>
+<p class="p1">.hs .val{font-size:17px;font-weight:700;color:var(--text)}</p>
+<p class="p1">.hs .lbl{font-size:10px;color:var(--text3)}</p>
+<p class="p1">.kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--border)}</p>
+<p class="p1">.kpi{padding:10px 16px;border-right:1px solid var(--border)}</p>
+<p class="p1">.kpi:last-child{border-right:none}</p>
+<p class="p1">.kpi .k-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;display:flex;align-items:center;gap:4px}</p>
+<p class="p1">.kpi .k-val{font-size:18px;font-weight:700}</p>
+<p class="p1">.kpi .k-d{font-size:10px;margin-top:1px}</p>
+<p class="p2"><br></p>
+<p class="p1">/* SEARCH */</p>
+<p class="p1">.search-bar{display:flex;gap:8px;padding:8px 20px;border-bottom:1px solid var(--border);background:var(--bg);align-items:center}</p>
+<p class="p1">.search-input{flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:6px 12px;color:var(--text);font-size:12px;outline:none;transition:.15s}</p>
+<p class="p1">.search-input:focus{border-color:var(--blue)}</p>
+<p class="p1">.search-input::placeholder{color:var(--text3)}</p>
+<p class="p1">.ai-btn{background:var(--blue2);color:var(--blue);border:1px solid var(--blue3);border-radius:6px;padding:6px 12px;cursor:pointer;font-size:11px;white-space:nowrap;display:flex;align-items:center;gap:4px;transition:.15s}</p>
+<p class="p1">.ai-btn:hover{background:var(--blue);color:#fff}</p>
+<p class="p1">.export-btn{background:var(--bg3);color:var(--text2);border:1px solid var(--border2);border-radius:6px;padding:6px 10px;cursor:pointer;font-size:11px;display:flex;align-items:center;gap:4px;transition:.15s}</p>
+<p class="p1">.export-btn:hover{background:var(--bg4);color:var(--text)}</p>
+<p class="p1">.ai-result{margin:0 20px 8px;background:var(--bg3);border-left:2px solid var(--blue);border-radius:6px;padding:10px 14px;font-size:12px;line-height:1.8;color:var(--text2);display:none}</p>
+<p class="p1">.ai-result.show{display:block}</p>
+<p class="p1">.ai-loading{display:none;padding:5px 20px;font-size:11px;color:var(--text3);align-items:center;gap:6px}</p>
+<p class="p1">.ai-loading.show{display:flex}</p>
+<p class="p2"><br></p>
+<p class="p1">/* MAIN */</p>
+<p class="p1">.main-layout{display:grid;grid-template-columns:1fr 300px;height:calc(100vh - 48px - 32px - 104px - 37px);overflow:hidden}</p>
+<p class="p1">.center{overflow-y:auto}</p>
+<p class="p1">.sidebar{overflow-y:auto;border-left:1px solid var(--border);background:var(--bg2)}</p>
+<p class="p2"><br></p>
+<p class="p1">/* TABS */</p>
+<p class="p1">.tab-bar{display:flex;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0}</p>
+<p class="p1">.tab{padding:8px 14px;cursor:pointer;color:var(--text2);font-size:11px;font-weight:500;border-bottom:2px solid transparent;transition:.12s;display:flex;align-items:center;gap:4px;white-space:nowrap}</p>
+<p class="p1">.tab:hover{color:var(--text)}</p>
+<p class="p1">.tab.active{color:var(--blue);border-bottom-color:var(--blue)}</p>
+<p class="p1">.tab-count{background:var(--bg4);color:var(--text3);font-size:9px;padding:1px 5px;border-radius:3px}</p>
+<p class="p2"><br></p>
+<p class="p1">/* TABLE */</p>
+<p class="p1">.tbl-wrap{padding:0 16px}</p>
+<p class="p1">.tbl-header{display:flex;align-items:center;justify-content:space-between;padding:10px 0 6px}</p>
+<p class="p1">.tbl-title{font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--text2)}</p>
+<p class="p1">.filter-row{display:flex;gap:4px}</p>
+<p class="p1">.fb{padding:3px 8px;border-radius:4px;border:1px solid var(--border2);background:transparent;color:var(--text2);font-size:10px;cursor:pointer;transition:.12s}</p>
+<p class="p1">.fb:hover{background:var(--bg4);color:var(--text)}</p>
+<p class="p1">.fb.active{background:var(--blue2);color:var(--blue);border-color:var(--blue3)}</p>
+<p class="p1">.data-table{width:100%;border-collapse:collapse}</p>
+<p class="p1">.data-table th{font-size:10px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--text3);padding:5px 8px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap}</p>
+<p class="p1">.data-table td{padding:8px 8px;border-bottom:1px solid var(--border);font-size:12px;vertical-align:middle}</p>
+<p class="p1">.data-table tr:hover td{background:var(--bg3)}</p>
+<p class="p1">.data-table tr{cursor:pointer}</p>
+<p class="p1">.co-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;display:inline-block;margin-right:6px}</p>
+<p class="p1">.status-pill{font-size:9px;padding:2px 7px;border-radius:3px;font-weight:500;white-space:nowrap;display:inline-block}</p>
+<p class="p1">.s-awarded{background:var(--green2);color:var(--green)}</p>
+<p class="p1">.s-open{background:var(--amber2);color:var(--amber)}</p>
+<p class="p1">.s-eval{background:var(--blue2);color:var(--blue)}</p>
+<p class="p1">.amt{font-weight:600;color:var(--text);white-space:nowrap}</p>
+<p class="p1">.tag-s{font-size:9px;padding:1px 6px;border-radius:3px;background:var(--bg4);color:var(--text3);display:inline-block}</p>
+<p class="p2"><br></p>
+<p class="p1">/* COMPARE VIEW */</p>
+<p class="p1">.compare-header{padding:14px 16px 10px;border-bottom:1px solid var(--border)}</p>
+<p class="p1">.compare-select-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}</p>
+<p class="p1">.co-select{background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:6px 10px;color:var(--text);font-size:12px;outline:none;cursor:pointer;min-width:160px}</p>
+<p class="p1">.co-select:focus{border-color:var(--blue)}</p>
+<p class="p1">.compare-btn{background:var(--blue2);color:var(--blue);border:1px solid var(--blue3);border-radius:6px;padding:6px 14px;cursor:pointer;font-size:12px;transition:.15s}</p>
+<p class="p1">.compare-btn:hover{background:var(--blue);color:#fff}</p>
+<p class="p1">.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:14px 16px}</p>
+<p class="p1">.compare-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;overflow:hidden}</p>
+<p class="p1">.compare-card-header{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}</p>
+<p class="p1">.cc-logo{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800}</p>
+<p class="p1">.cc-name{font-size:13px;font-weight:700}</p>
+<p class="p1">.cc-ticker{font-size:10px;color:var(--text3)}</p>
+<p class="p1">.compare-stats{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border)}</p>
+<p class="p1">.cs{background:var(--bg3);padding:10px 12px}</p>
+<p class="p1">.cs .cv{font-size:15px;font-weight:700;color:var(--text)}</p>
+<p class="p1">.cs .cl{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-top:1px}</p>
+<p class="p1">.compare-chart-wrap{padding:12px 14px}</p>
+<p class="p1">.compare-vs{display:flex;align-items:center;justify-content:center;padding:14px 0}</p>
+<p class="p1">.vs-badge{background:var(--bg4);border:1px solid var(--border2);border-radius:20px;padding:4px 14px;font-size:11px;color:var(--text3);font-weight:600}</p>
+<p class="p1">.winner-bar-wrap{padding:0 16px 14px}</p>
+<p class="p1">.winner-label{font-size:10px;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.8px}</p>
+<p class="p1">.wbar-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}</p>
+<p class="p1">.wbar-name{font-size:11px;color:var(--text2);width:90px;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}</p>
+<p class="p1">.wbar-track{flex:1;height:6px;background:var(--bg5);border-radius:3px;overflow:hidden}</p>
+<p class="p1">.wbar-fill{height:6px;border-radius:3px}</p>
+<p class="p1">.wbar-val{font-size:11px;font-weight:600;min-width:50px}</p>
+<p class="p2"><br></p>
+<p class="p1">/* STOCK VIEW */</p>
+<p class="p1">.stock-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:14px 16px}</p>
+<p class="p1">.stock-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px 14px;cursor:pointer;transition:.15s}</p>
+<p class="p1">.stock-card:hover{border-color:var(--border2);background:var(--bg4)}</p>
+<p class="p1">.sc-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px}</p>
+<p class="p1">.sc-ticker{font-size:14px;font-weight:800;color:var(--text)}</p>
+<p class="p1">.sc-name{font-size:10px;color:var(--text3);margin-top:1px}</p>
+<p class="p1">.sc-price{font-size:20px;font-weight:700}</p>
+<p class="p1">.sc-chg{font-size:11px;margin-top:2px}</p>
+<p class="p1">.sc-stats{display:flex;gap:10px;margin-top:8px}</p>
+<p class="p1">.sc-stat .sv{font-size:11px;font-weight:600;color:var(--text)}</p>
+<p class="p1">.sc-stat .sl{font-size:9px;color:var(--text3)}</p>
+<p class="p1">.sc-mini{height:40px;margin-top:8px;position:relative}</p>
+<p class="p2"><br></p>
+<p class="p1">/* SIDEBAR */</p>
+<p class="p1">.sb-block{padding:12px 12px;border-bottom:1px solid var(--border)}</p>
+<p class="p1">.sb-title{font-size:10px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--text3);margin-bottom:8px}</p>
+<p class="p1">.company-row{display:flex;align-items:center;gap:7px;padding:5px 4px;cursor:pointer;transition:.1s;border-radius:4px}</p>
+<p class="p1">.company-row:hover{background:var(--bg4)}</p>
+<p class="p1">.cr-logo{width:22px;height:22px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:800;flex-shrink:0}</p>
+<p class="p1">.cr-name{font-size:11px;flex:1;font-weight:500}</p>
+<p class="p1">.cr-bar-wrap{width:50px;height:3px;background:var(--bg5);border-radius:2px}</p>
+<p class="p1">.cr-bar{height:3px;border-radius:2px}</p>
+<p class="p1">.cr-amt{font-size:10px;font-weight:600;min-width:38px;text-align:right}</p>
+<p class="p1">.rivalry-row{padding:6px 0;border-bottom:1px solid var(--border)}</p>
+<p class="p1">.rivalry-row:last-child{border-bottom:none}</p>
+<p class="p1">.rr-prog{font-size:11px;font-weight:500;color:var(--text);margin-bottom:2px}</p>
+<p class="p1">.rr-co{font-size:10px;color:var(--text2)}</p>
+<p class="p1">.rr-badge{font-size:9px;padding:1px 5px;border-radius:3px;background:var(--purple2);color:var(--purple);float:right}</p>
+<p class="p1">.alert-row{display:flex;gap:7px;padding:5px 0}</p>
+<p class="p1">.ar-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;margin-top:4px}</p>
+<p class="p1">.ar-text{font-size:11px;color:var(--text)}</p>
+<p class="p1">.ar-time{font-size:9px;color:var(--text3)}</p>
+<p class="p1">.source-link{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--blue);text-decoration:none;padding:5px 7px;background:var(--bg3);border-radius:5px;margin-bottom:3px;transition:.12s}</p>
+<p class="p1">.source-link:hover{background:var(--bg4)}</p>
+<p class="p2"><br></p>
+<p class="p1">/* MODAL */</p>
+<p class="p1">.overlay{display:none;position:fixed;inset:0;background:#000000aa;z-index:200;align-items:center;justify-content:center}</p>
+<p class="p1">.overlay.show{display:flex}</p>
+<p class="p1">.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:12px;width:620px;max-height:82vh;overflow-y:auto;padding:22px}</p>
+<p class="p1">.modal-close{background:none;border:none;color:var(--text2);cursor:pointer;font-size:16px}</p>
+<p class="p1">.mstat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0}</p>
+<p class="p1">.mstat{background:var(--bg3);border-radius:6px;padding:10px 12px;border:1px solid var(--border)}</p>
+<p class="p1">.mstat .mv{font-size:16px;font-weight:700}</p>
+<p class="p1">.mstat .ml{font-size:9px;color:var(--text3);margin-top:1px;text-transform:uppercase;letter-spacing:.7px}</p>
+<p class="p1">.modal-sec-title{font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--text3);margin:14px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--border)}</p>
+<p class="p1">.map-tooltip{position:fixed;background:var(--bg2);border:1px solid var(--border2);border-radius:6px;padding:7px 11px;font-size:11px;pointer-events:none;display:none;z-index:300}</p>
+<p class="p2"><br></p>
+<p class="p1">/* FINNHUB NOTE */</p>
+<p class="p1">.finnhub-note{margin:8px 16px;background:var(--bg3);border:1px solid var(--amber2);border-left:2px solid var(--amber);border-radius:6px;padding:8px 12px;font-size:11px;color:var(--text2)}</p>
+<p class="p2"><br></p>
+<p class="p1">::-webkit-scrollbar{width:3px;height:3px}</p>
+<p class="p1">::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}</p>
+<p class="p1">&lt;/style&gt;</p>
+<p class="p1">&lt;/head&gt;</p>
+<p class="p1">&lt;body&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;div class="topbar"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;a class="logo" href="#"&gt;&lt;div class="logo-mark"&gt;&lt;i class="ti ti-shield-bolt"&gt;&lt;/i&gt;&lt;/div&gt;&lt;span class="logo-text"&gt;DefSpend&lt;span class="logo-tld"&gt;.com&lt;/span&gt;&lt;/span&gt;&lt;/a&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="nav-links"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;button class="nl active" onclick="showView('contracts',this)"&gt;&lt;i class="ti ti-file-dollar" style="font-size:11px"&gt;&lt;/i&gt;Contracts&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;button class="nl" onclick="showView('rfp',this)"&gt;&lt;i class="ti ti-radar" style="font-size:11px"&gt;&lt;/i&gt;Open RFPs&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;button class="nl" onclick="showView('map',this)"&gt;&lt;i class="ti ti-map-2" style="font-size:11px"&gt;&lt;/i&gt;Map&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;button class="nl" onclick="showView('companies',this)"&gt;&lt;i class="ti ti-building-skyscraper" style="font-size:11px"&gt;&lt;/i&gt;Companies&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;button class="nl" onclick="showView('compare',this)"&gt;&lt;i class="ti ti-columns" style="font-size:11px"&gt;&lt;/i&gt;Compare&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;button class="nl" onclick="showView('stocks',this)"&gt;&lt;i class="ti ti-chart-candle" style="font-size:11px"&gt;&lt;/i&gt;Stocks&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;button class="nl" onclick="showView('rivalries',this)"&gt;&lt;i class="ti ti-tournament" style="font-size:11px"&gt;&lt;/i&gt;Competition&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="topbar-right"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="live-badge"&gt;&lt;span class="dot"&gt;&lt;/span&gt;Live&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;!-- STOCK TICKER TAPE --&gt;</p>
+<p class="p1">&lt;div class="ticker-tape"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="ticker-inner" id="tickerInner"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;div class="hero"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="hero-row"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="hero-main"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="label"&gt;DoD Total Obligated — FY2024&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="bignum" id="heroNum"&gt;$346.8B&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="sub" id="heroSub"&gt;287,428 contracts &amp;nbsp;·&amp;nbsp; 42,000+ vendors &amp;nbsp;·&amp;nbsp; Source: USASpending.gov&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="hero-stats"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="hs"&gt;&lt;div class="val"&gt;287K&lt;/div&gt;&lt;div class="lbl"&gt;Contracts&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="hs"&gt;&lt;div class="val"&gt;42K&lt;/div&gt;&lt;div class="lbl"&gt;Vendors&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="hs"&gt;&lt;div class="val"&gt;$1.2M&lt;/div&gt;&lt;div class="lbl"&gt;Avg. Award&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="kpi-strip"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="kpi"&gt;&lt;div class="k-lbl" style="color:#4ade8077"&gt;&lt;span style="width:6px;height:6px;border-radius:50%;background:#4ade80;display:inline-block"&gt;&lt;/span&gt;Army&lt;/div&gt;&lt;div class="k-val" style="color:#4ade80"&gt;$98.3B&lt;/div&gt;&lt;div class="k-d up"&gt;+6.1%&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="kpi"&gt;&lt;div class="k-lbl" style="color:#60a5fa77"&gt;&lt;span style="width:6px;height:6px;border-radius:50%;background:#60a5fa;display:inline-block"&gt;&lt;/span&gt;Navy&lt;/div&gt;&lt;div class="k-val" style="color:#60a5fa"&gt;$112.7B&lt;/div&gt;&lt;div class="k-d up"&gt;+3.8%&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="kpi"&gt;&lt;div class="k-lbl" style="color:#fb923c77"&gt;&lt;span style="width:6px;height:6px;border-radius:50%;background:#fb923c;display:inline-block"&gt;&lt;/span&gt;Air Force&lt;/div&gt;&lt;div class="k-val" style="color:#fb923c"&gt;$89.4B&lt;/div&gt;&lt;div class="k-d dn"&gt;-1.2%&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="kpi"&gt;&lt;div class="k-lbl" style="color:#a78bfa77"&gt;&lt;span style="width:6px;height:6px;border-radius:50%;background:#a78bfa;display:inline-block"&gt;&lt;/span&gt;Other DoD&lt;/div&gt;&lt;div class="k-val" style="color:#a78bfa"&gt;$46.4B&lt;/div&gt;&lt;div class="k-d up"&gt;+8.9%&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;div class="search-bar"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;input class="search-input" id="aiQ" placeholder='AI Search: "Compare Lockheed vs Northrop on USAF contracts" · "Who is winning hypersonic competitions?" · "DARPA AI spending trends"'&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;button class="ai-btn" onclick="runAI()"&gt;&lt;i class="ti ti-sparkles" style="font-size:11px"&gt;&lt;/i&gt;Analyze&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;button class="export-btn" onclick="exportCSV()"&gt;&lt;i class="ti ti-download" style="font-size:11px"&gt;&lt;/i&gt;CSV&lt;/button&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="ai-loading" id="aiLoad"&gt;&lt;i class="ti ti-loader" style="font-size:11px"&gt;&lt;/i&gt;Analyzing…&lt;/div&gt;</p>
+<p class="p1">&lt;div class="ai-result" id="aiRes"&gt;&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;div class="main-layout"&gt;</p>
+<p class="p1">&lt;div class="center" id="centerPane"&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- CONTRACTS --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="view-contracts"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="tab-bar"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="tab active" onclick="switchSub(this,'sub-recent')"&gt;&lt;i class="ti ti-clock" style="font-size:10px"&gt;&lt;/i&gt;Recent &lt;span class="tab-count" id="cnt-r"&gt;50&lt;/span&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="tab" onclick="switchSub(this,'sub-top')"&gt;&lt;i class="ti ti-trophy" style="font-size:10px"&gt;&lt;/i&gt;Top by Value&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="sub-recent"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="tbl-wrap"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="tbl-header"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="tbl-title"&gt;Latest DoD Awards&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="filter-row"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;button class="fb active" onclick="filterTbl(this,'all')"&gt;All&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;button class="fb" onclick="filterTbl(this,'ARMY')"&gt;Army&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;button class="fb" onclick="filterTbl(this,'NAVY')"&gt;Navy&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;button class="fb" onclick="filterTbl(this,'AIR FORCE')"&gt;USAF&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;table class="data-table"&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Vendor&lt;/th&gt;&lt;th&gt;Description&lt;/th&gt;&lt;th&gt;Agency&lt;/th&gt;&lt;th&gt;Amount&lt;/th&gt;&lt;th&gt;Date&lt;/th&gt;&lt;th&gt;Status&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody id="contractTbody"&gt;&lt;/tbody&gt;&lt;/table&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="sub-top" style="display:none"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="tbl-wrap"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="tbl-header"&gt;&lt;div class="tbl-title"&gt;Top Contracts by Value&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;table class="data-table"&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;#&lt;/th&gt;&lt;th&gt;Vendor&lt;/th&gt;&lt;th&gt;Description&lt;/th&gt;&lt;th&gt;Amount&lt;/th&gt;&lt;th&gt;Agency&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody id="topTbody"&gt;&lt;/tbody&gt;&lt;/table&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- RFP --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="view-rfp" style="display:none"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="tbl-wrap"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="tbl-header"&gt;&lt;div class="tbl-title"&gt;Active Solicitations — SAM.gov&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;table class="data-table"&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Title&lt;/th&gt;&lt;th&gt;Agency&lt;/th&gt;&lt;th&gt;Est. Value&lt;/th&gt;&lt;th&gt;Deadline&lt;/th&gt;&lt;th&gt;Stage&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody id="rfpTbody"&gt;&lt;/tbody&gt;&lt;/table&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- MAP --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="view-map" style="display:none"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="tbl-wrap"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="tbl-header"&gt;&lt;div class="tbl-title"&gt;Contract Obligations by State — FY2024&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div id="mapSvg"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div style="display:flex;gap:8px;align-items:center;font-size:10px;color:var(--text3);margin-top:6px"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;span&gt;Low&lt;/span&gt;&lt;div style="height:7px;width:180px;border-radius:3px;background:linear-gradient(to right,#0f2a5c,#4f8ef7,#22d47a)"&gt;&lt;/div&gt;&lt;span&gt;High ($52B)&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- COMPANIES --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="view-companies" style="display:none"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="tbl-wrap"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="tbl-header"&gt;&lt;div class="tbl-title"&gt;Top Defense Contractors — FY2024&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;table class="data-table"&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Company&lt;/th&gt;&lt;th&gt;Ticker&lt;/th&gt;&lt;th&gt;FY24 Obligated&lt;/th&gt;&lt;th&gt;Contracts&lt;/th&gt;&lt;th&gt;YoY&lt;/th&gt;&lt;th&gt;Sector&lt;/th&gt;&lt;th&gt;&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody id="companiesTbody"&gt;&lt;/tbody&gt;&lt;/table&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- COMPARE --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="view-compare" style="display:none"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="compare-header"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="tbl-title" style="margin-bottom:10px"&gt;Side-by-Side Company Comparison&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="compare-select-row"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;select class="co-select" id="cmpA"&gt;&lt;option value=""&gt;Select Company A…&lt;/option&gt;&lt;/select&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;span style="color:var(--text3);font-size:12px;font-weight:600"&gt;vs&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;select class="co-select" id="cmpB"&gt;&lt;option value=""&gt;Select Company B…&lt;/option&gt;&lt;/select&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;button class="compare-btn" onclick="runCompare()"&gt;&lt;i class="ti ti-columns" style="font-size:11px"&gt;&lt;/i&gt; Compare&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="compareResult"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- STOCKS --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="view-stocks" style="display:none"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="finnhub-note"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;i class="ti ti-info-circle" style="color:var(--amber)"&gt;&lt;/i&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;strong style="color:var(--amber)"&gt; Simulated prices&lt;/strong&gt; — To connect real-time data, add your &lt;a href="https://finnhub.io" style="color:var(--blue)"&gt;Finnhub API key&lt;/a&gt; on line &lt;code style="background:var(--bg4);padding:1px 4px;border-radius:3px"&gt;FINNHUB_KEY&lt;/code&gt; in the source code. Prices update every 30s below.</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="stock-grid" id="stockGrid"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- RIVALRIES --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="view-rivalries" style="display:none"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="tbl-wrap"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="tbl-header"&gt;&lt;div class="tbl-title"&gt;Active Competition — Source Selection&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;table class="data-table"&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Program&lt;/th&gt;&lt;th&gt;Competitors&lt;/th&gt;&lt;th&gt;Est. Value&lt;/th&gt;&lt;th&gt;Category&lt;/th&gt;&lt;th&gt;Stage&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody id="rivalriesTbody"&gt;&lt;/tbody&gt;&lt;/table&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;!-- SIDEBAR --&gt;</p>
+<p class="p1">&lt;div class="sidebar"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="sb-block"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="sb-title"&gt;Sector Breakdown&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div style="position:relative;height:150px"&gt;&lt;canvas id="sectorChart" role="img" aria-label="DoD contracts by sector"&gt;Aviation 28%, Land 22%, Naval 19%, C4ISR 16%, Missiles 15%.&lt;/canvas&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:7px"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;span style="display:flex;align-items:center;gap:3px;font-size:10px;color:var(--text2)"&gt;&lt;span style="width:6px;height:6px;border-radius:2px;background:#fb923c;display:inline-block"&gt;&lt;/span&gt;Aviation&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;span style="display:flex;align-items:center;gap:3px;font-size:10px;color:var(--text2)"&gt;&lt;span style="width:6px;height:6px;border-radius:2px;background:#4ade80;display:inline-block"&gt;&lt;/span&gt;Land&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;span style="display:flex;align-items:center;gap:3px;font-size:10px;color:var(--text2)"&gt;&lt;span style="width:6px;height:6px;border-radius:2px;background:#60a5fa;display:inline-block"&gt;&lt;/span&gt;Naval&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;span style="display:flex;align-items:center;gap:3px;font-size:10px;color:var(--text2)"&gt;&lt;span style="width:6px;height:6px;border-radius:2px;background:#a78bfa;display:inline-block"&gt;&lt;/span&gt;C4ISR&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;span style="display:flex;align-items:center;gap:3px;font-size:10px;color:var(--text2)"&gt;&lt;span style="width:6px;height:6px;border-radius:2px;background:#f472b6;display:inline-block"&gt;&lt;/span&gt;Missiles&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="sb-block"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="sb-title"&gt;Top Contractors&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="sbCompanies"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="sb-block"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="sb-title"&gt;Active Competitions&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="sbRivalries"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="sb-block"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="sb-title"&gt;Alerts&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="sbAlerts"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="sb-block"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="sb-title"&gt;Data Sources&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;a class="source-link" href="https://www.usaspending.gov"&gt;&lt;i class="ti ti-external-link" style="font-size:10px"&gt;&lt;/i&gt;USASpending.gov&lt;/a&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;a class="source-link" href="https://sam.gov"&gt;&lt;i class="ti ti-external-link" style="font-size:10px"&gt;&lt;/i&gt;SAM.gov — Open RFPs&lt;/a&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;a class="source-link" href="https://www.defense.gov/News/Contracts/"&gt;&lt;i class="ti ti-external-link" style="font-size:10px"&gt;&lt;/i&gt;Pentagon Daily Contracts&lt;/a&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;a class="source-link" href="https://finnhub.io"&gt;&lt;i class="ti ti-external-link" style="font-size:10px"&gt;&lt;/i&gt;Finnhub — Stock API&lt;/a&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;div class="overlay" id="overlay" onclick="if(event.target===this)closeModal()"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="modal" id="modal"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div class="map-tooltip" id="mapTip"&gt;&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;script&gt;</p>
+<p class="p1">// ─── DATA ───────────────────────────────────────────────────────────</p>
+<p class="p1">const FINNHUB_KEY = ''; // paste your Finnhub key here e.g. 'cq1abc123xyz'</p>
+<p class="p2"><br></p>
+<p class="p1">const companies = [</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{name:"Lockheed Martin",ticker:"LMT",color:"#4f8ef7",pct:100,fy24:"$62.4B",raw:62.4,contracts:1847,trend:"+3.2%",sector:"Aviation/Missiles",desc:"World's largest defense contractor. Dominates F-35, missile defense, space.",programs:["F-35 Lightning II","Sikorsky helicopters","PAC-3 Missiles","Space systems"],fy:[56.3,60.4,62.4],stock:{price:452.30,chg:+1.24,pct:+0.27,mktcap:"$118B",pe:"16.2x",yield:"2.8%",hi52:"487.50",lo52:"391.20"}},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{name:"Raytheon / RTX",ticker:"RTX",color:"#fb923c",pct:74,fy24:"$46.1B",raw:46.1,contracts:2134,trend:"+1.8%",sector:"Missiles/C4ISR",desc:"Leading missile and avionics supplier. Patriot, Tomahawk, AMRAAM, P&amp;W engines.",programs:["Patriot PAC-3","Tomahawk Missile","AMRAAM","Pratt &amp; Whitney"],fy:[41.2,45.3,46.1],stock:{price:118.70,chg:+0.45,pct:+0.38,mktcap:"$155B",pe:"32.1x",yield:"2.2%",hi52:"126.80",lo52:"89.40"}},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{name:"Boeing Defense",ticker:"BA",color:"#22d47a",pct:54,fy24:"$33.5B",raw:33.5,contracts:943,trend:"-4.1%",sector:"Aviation/Naval",desc:"Major aircraft supplier under pressure from production delays and cost overruns.",programs:["F-15EX Eagle II","AH-64 Apache","T-7A Red Hawk","MQ-25 Stingray"],fy:[34.9,34.9,33.5],stock:{price:176.20,chg:-2.10,pct:-1.18,mktcap:"$134B",pe:"N/A",yield:"0%",hi52:"214.80",lo52:"138.60"}},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{name:"Northrop Grumman",ticker:"NOC",color:"#a78bfa",pct:48,fy24:"$29.8B",raw:29.8,contracts:1211,trend:"+7.4%",sector:"Aviation/Space",desc:"B-21 Raider, Sentinel ICBM modernization, space and cyber systems.",programs:["B-21 Raider","Sentinel ICBM","E-2D Hawkeye","GBSD"],fy:[25.4,27.7,29.8],stock:{price:484.60,chg:+3.20,pct:+0.66,mktcap:"$72B",pe:"17.8x",yield:"1.7%",hi52:"512.30",lo52:"406.70"}},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{name:"General Dynamics",ticker:"GD",color:"#f472b6",pct:44,fy24:"$27.3B",raw:27.3,contracts:1688,trend:"+2.9%",sector:"Land/Naval",desc:"Combat vehicles, nuclear submarines (SSN/SSBN), and IT services via GDIT.",programs:["M1A2 Abrams","Virginia-class submarines","Stryker","GDIT IT services"],fy:[24.8,26.5,27.3],stock:{price:278.40,chg:+1.05,pct:+0.38,mktcap:"$76B",pe:"19.4x",yield:"2.1%",hi52:"302.10",lo52:"241.80"}},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{name:"HII (Huntington Ingalls)",ticker:"HII",color:"#2dd4bf",pct:34,fy24:"$21.1B",raw:21.1,contracts:412,trend:"+9.2%",sector:"Naval",desc:"America's largest military shipbuilder. Gerald R. Ford carriers, DDG destroyers.",programs:["Gerald R. Ford CVN","Virginia submarines","DDG-51 destroyers","NSC cutters"],fy:[17.8,19.3,21.1],stock:{price:212.80,chg:-0.90,pct:-0.42,mktcap:"$8.1B",pe:"11.2x",yield:"2.6%",hi52:"258.40",lo52:"189.30"}},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{name:"L3Harris Technologies",ticker:"LHX",color:"#e8c84a",pct:28,fy24:"$17.6B",raw:17.6,contracts:2891,trend:"+5.6%",sector:"C4ISR/Comms",desc:"Tactical radios, ISR sensors, night vision, and electronic warfare.",programs:["AN/PRC-163 radio","Night vision","WESCAM sensors","EW systems"],fy:[15.6,16.7,17.6],stock:{price:232.10,chg:+2.30,pct:+1.00,mktcap:"$44B",pe:"20.1x",yield:"2.4%",hi52:"248.70",lo52:"194.20"}},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{name:"BAE Systems US",ticker:"BA.L",color:"#f87171",pct:19,fy24:"$12.1B",raw:12.1,contracts:783,trend:"+0.3%",sector:"Land/Electronics",desc:"Bradley IFV, Paladin howitzer, electronic warfare, shipbuilding support.",programs:["Bradley M2A4","M109 Paladin","Electronic warfare","Armored vehicles"],fy:[11.4,12.1,12.1],stock:{price:14.20,chg:+0.08,pct:+0.57,mktcap:"$56B",pe:"15.3x",yield:"3.2%",hi52:"16.80",lo52:"11.90"}},</p>
+<p class="p1">];</p>
+<p class="p2"><br></p>
+<p class="p1">const stateData={"California":52.3,"Virginia":48.7,"Texas":31.2,"Maryland":18.4,"Connecticut":16.9,"Washington":14.2,"Florida":13.8,"Pennsylvania":11.6,"Alabama":10.4,"Georgia":9.8,"Missouri":9.1,"Massachusetts":8.7,"New York":8.2,"Colorado":7.6,"Arizona":7.1,"Ohio":6.9,"Michigan":6.4,"Minnesota":5.8,"New Mexico":5.4,"Indiana":4.9,"North Carolina":4.7,"Nevada":4.2,"Oklahoma":3.8,"Hawaii":3.6,"Mississippi":3.3,"Maine":3.1,"Utah":2.9,"Louisiana":2.7,"Tennessee":2.5,"Arkansas":2.2};</p>
+<p class="p2"><br></p>
+<p class="p1">const rivalries=[</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{prog:"NGAD — 6th Gen Fighter",a:"Lockheed Martin",b:"Boeing",val:"$20B+",cat:"Aviation",stage:"Eval"},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{prog:"Sentinel ICBM (GBSD)",a:"Northrop Grumman",b:"Boeing",val:"$95B",cat:"Strategic",stage:"Dev"},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{prog:"Hypersonic Cruise Missile",a:"Raytheon",b:"Lockheed Martin",val:"$1.9B",cat:"Missiles",stage:"Source Sel."},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{prog:"DDG-51 Flight III Lot 2",a:"General Dynamics BIW",b:"HII",val:"$5.6B",cat:"Naval",stage:"RFP Open"},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{prog:"IVAS 2.0 — AR Battlefield",a:"Microsoft / Elbit",b:"Palantir / Anduril",val:"$11.7B",cat:"C4ISR",stage:"Tech Eval"},</p>
+<p class="p1">];</p>
+<p class="p2"><br></p>
+<p class="p1">const alerts=[</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{text:"Northrop B-21 Raider lot 2 awarded",time:"2h ago",color:"#4ade80"},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{text:"NGAD RFP extended 30 days by USAF",time:"5h ago",color:"#f5a623"},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{text:"Palantir +$619M Maven AI contract",time:"1d ago",color:"#a78bfa"},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{text:"Boeing MH-139A bid rejected",time:"2d ago",color:"#f05252"},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{text:"HII wins $12.2B CVN-82 award",time:"3d ago",color:"#2dd4bf"},</p>
+<p class="p1">];</p>
+<p class="p2"><br></p>
+<p class="p1">let allContracts=[</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{vendor:"Lockheed Martin Corp",desc:"F-35 Lightning II Lot 18-19 LRIP",agency:"DEPT OF THE AIR FORCE",amount:15960000000,date:"2025-05-12",status:"awarded"},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{vendor:"Huntington Ingalls Industries",desc:"CVN-82 Ford-class carrier construction",agency:"DEPT OF THE NAVY",amount:12200000000,date:"2025-04-05",status:"awarded"},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{vendor:"General Dynamics Land Systems",desc:"M1A2 SEPv3 Abrams upgrade — 450 units",agency:"DEPT OF THE ARMY",amount:4370000000,date:"2025-05-08",status:"awarded"},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{vendor:"Raytheon Company",desc:"Patriot PAC-3 MSE missile system",agency:"DEPT OF THE ARMY",amount:3220000000,date:"2025-05-05",status:"awarded"},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{vendor:"Northrop Grumman Systems",desc:"B-21 Raider stealth bomber lot 1",agency:"DEPT OF THE AIR FORCE",amount:2800000000,date:"2025-04-30",status:"awarded"},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{vendor:"General Dynamics Bath Iron Works",desc:"DDG-51 Flight III destroyer",agency:"DEPT OF THE NAVY",amount:2350000000,date:"2025-04-15",status:"awarded"},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{vendor:"General Dynamics Mission Systems",desc:"Virginia-class submarine comms",agency:"DEPT OF THE NAVY",amount:1820000000,date:"2025-03-28",status:"awarded"},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{vendor:"Boeing Defense Space &amp; Security",desc:"MH-139A Grey Wolf helicopter",agency:"DEPT OF THE AIR FORCE",amount:1140000000,date:"2025-04-28",status:"awarded"},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{vendor:"BAE Systems Land &amp; Armaments",desc:"Bradley M2A4 IFV electronic upgrade",agency:"DEPT OF THE ARMY",amount:742000000,date:"2025-04-18",status:"awarded"},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{vendor:"L3Harris Technologies",desc:"AN/PRC-163 tactical radio systems",agency:"DEPT OF THE ARMY",amount:890000000,date:"2025-04-22",status:"awarded"},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{vendor:"Palantir Technologies",desc:"Maven Smart System AI platform",agency:"DEPT OF THE AIR FORCE",amount:619000000,date:"2025-04-10",status:"awarded"},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>{vendor:"Leidos Inc",desc:"DISA ENCORE III IT services",agency:"DEPT OF THE AIR FORCE",amount:580000000,date:"2025-04-02",status:"awarded"},</p>
+<p class="p1">];</p>
+<p class="p1">let currentFilter='all';</p>
+<p class="p1">let stockPrices={};</p>
+<p class="p2"><br></p>
+<p class="p1">// ─── STOCKS ─────────────────────────────────────────────────────────</p>
+<p class="p1">function simPrice(base,seed){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const r=(Math.sin(seed+Date.now()/60000)*0.5+0.5);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return+(base*(1+(r-0.5)*0.02)).toFixed(2);</p>
+<p class="p1">}</p>
+<p class="p1">function initStocks(){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>companies.forEach((c,i)=&gt;{</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const p=simPrice(c.stock.price,i);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const chg=+(p-c.stock.price).toFixed(2);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const pct=+((chg/c.stock.price)*100).toFixed(2);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>stockPrices[c.ticker]={...c.stock,price:p,chg,pct};</p>
+<p class="p1"><span class="Apple-converted-space">  </span>});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>renderTickerTape();</p>
+<p class="p1">}</p>
+<p class="p1">function renderTickerTape(){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const items=companies.map(c=&gt;{</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const s=stockPrices[c.ticker]||c.stock;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const up=s.chg&gt;=0;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>return `&lt;div class="tick-item" onclick="showView('stocks',document.querySelector('.nl:nth-child(6)'))"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;span class="tick-ticker" style="color:${c.color}"&gt;${c.ticker}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;span class="tick-price" style="color:${c.color}"&gt;${s.price.toFixed(2)}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;span class="tick-chg ${up?'up':'dn'}"&gt;${up?'▲':'▼'}${Math.abs(s.pct).toFixed(2)}%&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;`;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}).join('');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const t=document.getElementById('tickerInner');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>t.innerHTML=items+items;</p>
+<p class="p1">}</p>
+<p class="p1">async function fetchStocksLive(){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(!FINNHUB_KEY){initStocks();return;}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>for(const c of companies){</p>
+<p class="p1"><span class="Apple-converted-space">    </span>try{</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const r=await fetch(`https://finnhub.io/api/v1/quote?symbol=${c.ticker}&amp;token=${FINNHUB_KEY}`);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const d=await r.json();</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if(d.c){stockPrices[c.ticker]={...c.stock,price:d.c,chg:+(d.c-d.pc).toFixed(2),pct:+(((d.c-d.pc)/d.pc)*100).toFixed(2)};}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}catch(e){}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>renderTickerTape();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>renderStockGrid();</p>
+<p class="p1">}</p>
+<p class="p1">function renderStockGrid(){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('stockGrid').innerHTML=companies.map((c,i)=&gt;{</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const s=stockPrices[c.ticker]||c.stock;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const up=s.chg&gt;=0;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const sparkData=Array.from({length:20},(_,j)=&gt;+(s.price*(1+(Math.sin(j*0.8+i)*0.5+0.5-0.5)*0.04)).toFixed(2));</p>
+<p class="p1"><span class="Apple-converted-space">    </span>return`&lt;div class="stock-card" onclick="openModal('${c.name}')"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="sc-head"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div&gt;&lt;div class="sc-ticker" style="color:${c.color}"&gt;${c.ticker}&lt;/div&gt;&lt;div class="sc-name"&gt;${c.name.split(' ')[0]}&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div style="text-align:right"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="sc-price" style="color:${c.color}"&gt;$${s.price.toFixed(2)}&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="sc-chg ${up?'up':'dn'}"&gt;${up?'▲':'▼'} $${Math.abs(s.chg).toFixed(2)} (${Math.abs(s.pct).toFixed(2)}%)&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="sc-stats"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="sc-stat"&gt;&lt;div class="sv"&gt;${s.mktcap}&lt;/div&gt;&lt;div class="sl"&gt;Mkt Cap&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="sc-stat"&gt;&lt;div class="sv"&gt;${s.pe}&lt;/div&gt;&lt;div class="sl"&gt;P/E&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="sc-stat"&gt;&lt;div class="sv"&gt;${s.yield}&lt;/div&gt;&lt;div class="sl"&gt;Yield&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="sc-mini"&gt;&lt;canvas id="spark-${c.ticker}" role="img" aria-label="Price sparkline for ${c.ticker}"&gt;&lt;/canvas&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;`;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}).join('');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>setTimeout(()=&gt;{</p>
+<p class="p1"><span class="Apple-converted-space">    </span>companies.forEach((c,i)=&gt;{</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const s=stockPrices[c.ticker]||c.stock;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const el=document.getElementById('spark-'+c.ticker);if(!el)return;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const sparkData=Array.from({length:20},(_,j)=&gt;+(s.price*(1+(Math.sin(j*0.8+i)*0.015))).toFixed(2));</p>
+<p class="p1"><span class="Apple-converted-space">      </span>new Chart(el,{type:'line',data:{labels:sparkData.map((_,j)=&gt;j),datasets:[{data:sparkData,borderColor:c.color,borderWidth:1.5,pointRadius:0,tension:.4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{display:false},y:{display:false}}}});</p>
+<p class="p1"><span class="Apple-converted-space">    </span>});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>},80);</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">// ─── COMPARE ────────────────────────────────────────────────────────</p>
+<p class="p1">function populateSelects(){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const opts=companies.map(c=&gt;`&lt;option value="${c.name}"&gt;${c.name} (${c.ticker})&lt;/option&gt;`).join('');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('cmpA').innerHTML=`&lt;option value=""&gt;Select Company A…&lt;/option&gt;`+opts;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('cmpB').innerHTML=`&lt;option value=""&gt;Select Company B…&lt;/option&gt;`+opts;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('cmpA').value='Lockheed Martin';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('cmpB').value='Northrop Grumman';</p>
+<p class="p1">}</p>
+<p class="p1">function runCompare(){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const a=companies.find(c=&gt;c.name===document.getElementById('cmpA').value);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const b=companies.find(c=&gt;c.name===document.getElementById('cmpB').value);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(!a||!b){document.getElementById('compareResult').innerHTML='&lt;p style="padding:20px;color:var(--text2)"&gt;Please select two companies.&lt;/p&gt;';return;}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const metrics=[</p>
+<p class="p1"><span class="Apple-converted-space">    </span>{label:"FY24 Obligated",av:a.raw,bv:b.raw,fmt:v=&gt;'$'+v.toFixed(1)+'B',higher:'more'},</p>
+<p class="p1"><span class="Apple-converted-space">    </span>{label:"Active Contracts",av:a.contracts,bv:b.contracts,fmt:v=&gt;v.toLocaleString(),higher:'more'},</p>
+<p class="p1"><span class="Apple-converted-space">    </span>{label:"YoY Growth",av:parseFloat(a.trend),bv:parseFloat(b.trend),fmt:v=&gt;(v&gt;0?'+':'')+v+'%',higher:'more'},</p>
+<p class="p1"><span class="Apple-converted-space">    </span>{label:"Stock Price",av:(stockPrices[a.ticker]||a.stock).price,bv:(stockPrices[b.ticker]||b.stock).price,fmt:v=&gt;'$'+v.toFixed(2),higher:'more'},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>];</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const html=`</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="compare-grid"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="compare-card"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="compare-card-header"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="cc-logo" style="background:${a.color}22;color:${a.color}"&gt;${a.ticker.slice(0,2)}&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div&gt;&lt;div class="cc-name" style="color:${a.color}"&gt;${a.name}&lt;/div&gt;&lt;div class="cc-ticker"&gt;${a.ticker} · ${a.sector}&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="compare-stats"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="cs"&gt;&lt;div class="cv"&gt;${a.fy24}&lt;/div&gt;&lt;div class="cl"&gt;FY24 Obligated&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="cs"&gt;&lt;div class="cv"&gt;${a.contracts.toLocaleString()}&lt;/div&gt;&lt;div class="cl"&gt;Contracts&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="cs"&gt;&lt;div class="cv" style="color:${parseFloat(a.trend)&gt;0?'var(--green)':'var(--red)'}"&gt;${a.trend}&lt;/div&gt;&lt;div class="cl"&gt;YoY Growth&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="cs"&gt;&lt;div class="cv" style="color:${a.color}"&gt;$${(stockPrices[a.ticker]||a.stock).price.toFixed(2)}&lt;/div&gt;&lt;div class="cl"&gt;Stock&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="compare-chart-wrap"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div style="font-size:9px;color:var(--text3);margin-bottom:5px;text-transform:uppercase;letter-spacing:.8px"&gt;Obligations FY22–24&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div style="position:relative;height:80px"&gt;&lt;canvas id="chartA" role="img" aria-label="Historical obligations for ${a.name}"&gt;&lt;/canvas&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div style="padding:0 12px 12px"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px"&gt;Key Programs&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div style="display:flex;flex-wrap:wrap;gap:4px"&gt;${a.programs.map(p=&gt;`&lt;span class="tag-s"&gt;${p}&lt;/span&gt;`).join('')}&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="compare-card"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="compare-card-header"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="cc-logo" style="background:${b.color}22;color:${b.color}"&gt;${b.ticker.slice(0,2)}&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div&gt;&lt;div class="cc-name" style="color:${b.color}"&gt;${b.name}&lt;/div&gt;&lt;div class="cc-ticker"&gt;${b.ticker} · ${b.sector}&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="compare-stats"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="cs"&gt;&lt;div class="cv"&gt;${b.fy24}&lt;/div&gt;&lt;div class="cl"&gt;FY24 Obligated&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="cs"&gt;&lt;div class="cv"&gt;${b.contracts.toLocaleString()}&lt;/div&gt;&lt;div class="cl"&gt;Contracts&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="cs"&gt;&lt;div class="cv" style="color:${parseFloat(b.trend)&gt;0?'var(--green)':'var(--red)'}"&gt;${b.trend}&lt;/div&gt;&lt;div class="cl"&gt;YoY Growth&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="cs"&gt;&lt;div class="cv" style="color:${b.color}"&gt;$${(stockPrices[b.ticker]||b.stock).price.toFixed(2)}&lt;/div&gt;&lt;div class="cl"&gt;Stock&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="compare-chart-wrap"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div style="font-size:9px;color:var(--text3);margin-bottom:5px;text-transform:uppercase;letter-spacing:.8px"&gt;Obligations FY22–24&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div style="position:relative;height:80px"&gt;&lt;canvas id="chartB" role="img" aria-label="Historical obligations for ${b.name}"&gt;&lt;/canvas&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div style="padding:0 12px 12px"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px"&gt;Key Programs&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div style="display:flex;flex-wrap:wrap;gap:4px"&gt;${b.programs.map(p=&gt;`&lt;span class="tag-s"&gt;${p}&lt;/span&gt;`).join('')}&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="winner-bar-wrap"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="winner-label"&gt;Head-to-head metrics&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>${metrics.map(m=&gt;{</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const tot=m.av+m.bv||1;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const aw=Math.round((m.av/tot)*100);const bw=100-aw;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const awinner=m.higher==='more'?m.av&gt;=m.bv:m.av&lt;=m.bv;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>return`&lt;div style="margin-bottom:10px"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-bottom:4px"&gt;&lt;span&gt;${m.label}&lt;/span&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div style="display:flex;align-items:center;gap:8px"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;span style="font-size:10px;color:${a.color};min-width:80px;text-align:right;font-weight:${awinner?700:400}"&gt;${m.fmt(m.av)}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div style="flex:1;display:flex;height:6px;border-radius:3px;overflow:hidden;background:var(--bg5)"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div style="width:${aw}%;background:${a.color};border-radius:3px 0 0 3px"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div style="width:${bw}%;background:${b.color};border-radius:0 3px 3px 0"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;span style="font-size:10px;color:${b.color};min-width:80px;font-weight:${!awinner?700:400}"&gt;${m.fmt(m.bv)}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;`;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}).join('')}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;`;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('compareResult').innerHTML=html;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>setTimeout(()=&gt;{</p>
+<p class="p1"><span class="Apple-converted-space">    </span>[[a,'chartA'],[b,'chartB']].forEach(([co,id])=&gt;{</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const el=document.getElementById(id);if(!el)return;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>new Chart(el,{type:'bar',data:{labels:['FY22','FY23','FY24'],datasets:[{data:co.fy,backgroundColor:co.color+'66',borderColor:co.color,borderWidth:1.5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'#ffffff06'},ticks:{color:'#454e68',font:{size:9}}},y:{grid:{color:'#ffffff06'},ticks:{color:'#454e68',font:{size:9},callback:v=&gt;'$'+v+'B'}}}}});</p>
+<p class="p1"><span class="Apple-converted-space">    </span>});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>},60);</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">// ─── CONTRACTS ──────────────────────────────────────────────────────</p>
+<p class="p1">function agencyColor(a){if(!a)return'#555e75';if(a.includes('ARMY'))return'#4ade80';if(a.includes('NAVY'))return'#60a5fa';if(a.includes('AIR'))return'#fb923c';return'#a78bfa';}</p>
+<p class="p1">function agencyShort(a){if(!a)return'DoD';if(a.includes('ARMY'))return'Army';if(a.includes('NAVY'))return'Navy';if(a.includes('AIR'))return'USAF';return'DoD';}</p>
+<p class="p1">function fmt(v){if(!v)return'—';if(v&gt;=1e9)return'$'+(v/1e9).toFixed(1)+'B';if(v&gt;=1e6)return'$'+(v/1e6).toFixed(0)+'M';return'$'+v.toLocaleString();}</p>
+<p class="p2"><br></p>
+<p class="p1">function renderContractTable(data){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const f=currentFilter==='all'?data:data.filter(c=&gt;c.agency.toUpperCase().includes(currentFilter));</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('contractTbody').innerHTML=f.map(c=&gt;`&lt;tr onclick=""&gt;&lt;td&gt;&lt;span class="co-dot" style="background:${agencyColor(c.agency)}"&gt;&lt;/span&gt;&lt;strong&gt;${c.vendor.slice(0,26)}&lt;/strong&gt;&lt;/td&gt;&lt;td style="color:var(--text2);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"&gt;${c.desc.slice(0,50)}${c.desc.length&gt;50?'…':''}&lt;/td&gt;&lt;td&gt;&lt;span class="tag-s" style="color:${agencyColor(c.agency)}"&gt;${agencyShort(c.agency)}&lt;/span&gt;&lt;/td&gt;&lt;td class="amt"&gt;${fmt(c.amount)}&lt;/td&gt;&lt;td style="color:var(--text3)"&gt;${c.date?c.date.slice(0,10):''}&lt;/td&gt;&lt;td&gt;&lt;span class="status-pill s-awarded"&gt;Awarded&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;`).join('');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const s=[...data].sort((a,b)=&gt;b.amount-a.amount);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('topTbody').innerHTML=s.slice(0,10).map((c,i)=&gt;`&lt;tr&gt;&lt;td style="color:var(--text3);font-weight:700"&gt;#${i+1}&lt;/td&gt;&lt;td&gt;&lt;strong&gt;${c.vendor.slice(0,22)}&lt;/strong&gt;&lt;/td&gt;&lt;td style="color:var(--text2)"&gt;${c.desc.slice(0,45)}…&lt;/td&gt;&lt;td class="amt"&gt;${fmt(c.amount)}&lt;/td&gt;&lt;td&gt;&lt;span class="tag-s" style="color:${agencyColor(c.agency)}"&gt;${agencyShort(c.agency)}&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;`).join('');</p>
+<p class="p1">}</p>
+<p class="p1">function filterTbl(btn,f){document.querySelectorAll('.fb').forEach(b=&gt;b.classList.remove('active'));btn.classList.add('active');currentFilter=f;renderContractTable(allContracts);}</p>
+<p class="p2"><br></p>
+<p class="p1">function renderRFPs(){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const rfps=[</p>
+<p class="p1"><span class="Apple-converted-space">    </span>{title:"NGAD — Next Gen Air Dominance",agency:"USAF",val:"$20B+",deadline:"Jun 14 2025",stage:"open"},</p>
+<p class="p1"><span class="Apple-converted-space">    </span>{title:"IVAS 1.1 — AR Combat Goggles",agency:"Army",val:"$11.7B",deadline:"May 28 2025",stage:"eval"},</p>
+<p class="p1"><span class="Apple-converted-space">    </span>{title:"SDA Tranche 3 — LEO Satellites",agency:"Space Force",val:"$3.4B",deadline:"Jun 30 2025",stage:"open"},</p>
+<p class="p1"><span class="Apple-converted-space">    </span>{title:"Hypersonic Attack Cruise Missile",agency:"USAF",val:"$1.9B",deadline:"May 19 2025",stage:"eval"},</p>
+<p class="p1"><span class="Apple-converted-space">    </span>{title:"DDG-51 Flight III Lot 2",agency:"Navy",val:"$5.6B",deadline:"Jul 15 2025",stage:"open"},</p>
+<p class="p1"><span class="Apple-converted-space">    </span>{title:"Light Amphibious Warship",agency:"USMC",val:"$2.1B",deadline:"May 22 2025",stage:"eval"},</p>
+<p class="p1"><span class="Apple-converted-space">    </span>{title:"FLRAA — Future Long Range Assault Aircraft",agency:"Army",val:"$7.1B",deadline:"Aug 1 2025",stage:"open"},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>];</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('rfpTbody').innerHTML=rfps.map(r=&gt;`&lt;tr&gt;&lt;td&gt;&lt;strong&gt;${r.title}&lt;/strong&gt;&lt;/td&gt;&lt;td&gt;&lt;span class="tag-s"&gt;${r.agency}&lt;/span&gt;&lt;/td&gt;&lt;td class="amt"&gt;${r.val}&lt;/td&gt;&lt;td style="color:var(--text3)"&gt;${r.deadline}&lt;/td&gt;&lt;td&gt;&lt;span class="status-pill ${r.stage==='open'?'s-open':'s-eval'}"&gt;${r.stage==='open'?'Open':'Evaluation'}&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;`).join('');</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function renderMap(){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(document.getElementById('mapSvg').querySelector('svg'))return;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const w=560,h=340;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const color=d3.scaleSequential([0,55],d3.interpolate('#0f2a5c','#22d47a'));</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const tip=document.getElementById('mapTip');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>d3.json('https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json').then(us=&gt;{</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const svg=d3.select('#mapSvg').append('svg').attr('viewBox',`0 0 ${w} ${h}`).attr('width','100%');</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const proj=d3.geoAlbersUsa().scale(720).translate([w/2,h/2]);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const path=d3.geoPath(proj);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const names=new Map();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>topojson.feature(us,us.objects.states).features.forEach(f=&gt;names.set(f.id,f.properties.name));</p>
+<p class="p1"><span class="Apple-converted-space">    </span>svg.selectAll('path').data(topojson.feature(us,us.objects.states).features).join('path')</p>
+<p class="p1"><span class="Apple-converted-space">      </span>.attr('fill',d=&gt;{const n=names.get(d.id);const v=stateData[n];return v?color(v):'#1a1f2e'})</p>
+<p class="p1"><span class="Apple-converted-space">      </span>.attr('stroke','#ffffff10').attr('stroke-width',.5).style('cursor','pointer')</p>
+<p class="p1"><span class="Apple-converted-space">      </span>.on('mousemove',function(ev,d){</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const n=names.get(d.id);const v=stateData[n];</p>
+<p class="p1"><span class="Apple-converted-space">        </span>tip.style.display='block';tip.style.left=(ev.clientX+12)+'px';tip.style.top=(ev.clientY-28)+'px';</p>
+<p class="p1"><span class="Apple-converted-space">        </span>tip.innerHTML=`&lt;strong style="color:var(--text)"&gt;${n||'?'}&lt;/strong&gt;&lt;br&gt;&lt;span style="color:var(--blue)"&gt;${v?'$'+v+'B obligated':'No data'}&lt;/span&gt;`;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>d3.select(this).attr('stroke','#4f8ef7').attr('stroke-width',1.5);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>})</p>
+<p class="p1"><span class="Apple-converted-space">      </span>.on('mouseleave',function(){tip.style.display='none';d3.select(this).attr('stroke','#ffffff10').attr('stroke-width',.5);});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}).catch(()=&gt;{document.getElementById('mapSvg').innerHTML='&lt;p style="color:var(--text2);padding:16px;font-size:12px"&gt;Map requires CDN access.&lt;/p&gt;';});</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function renderCompanies(){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('companiesTbody').innerHTML=companies.map(c=&gt;`&lt;tr onclick="openModal('${c.name}')"&gt;&lt;td&gt;&lt;span class="co-dot" style="background:${c.color}"&gt;&lt;/span&gt;&lt;strong&gt;${c.name}&lt;/strong&gt;&lt;/td&gt;&lt;td style="color:var(--text3)"&gt;${c.ticker}&lt;/td&gt;&lt;td class="amt"&gt;${c.fy24}&lt;/td&gt;&lt;td style="color:var(--text2)"&gt;${c.contracts.toLocaleString()}&lt;/td&gt;&lt;td style="color:${c.trend.startsWith('+')?'var(--green)':'var(--red)'}"&gt;${c.trend}&lt;/td&gt;&lt;td&gt;&lt;span class="tag-s"&gt;${c.sector}&lt;/span&gt;&lt;/td&gt;&lt;td&gt;&lt;span class="tag-s" style="color:var(--blue);cursor:pointer" onclick="event.stopPropagation();document.getElementById('cmpA').value='${c.name}';showView('compare',document.querySelectorAll('.nl')[4])"&gt;Compare&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;`).join('');</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function renderRivalries(){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('rivalriesTbody').innerHTML=rivalries.map(r=&gt;`&lt;tr&gt;&lt;td&gt;&lt;strong&gt;${r.prog}&lt;/strong&gt;&lt;/td&gt;&lt;td&gt;&lt;span style="color:var(--blue)"&gt;${r.a}&lt;/span&gt;&lt;span style="color:var(--text3)"&gt; vs &lt;/span&gt;&lt;span style="color:var(--orange)"&gt;${r.b}&lt;/span&gt;&lt;/td&gt;&lt;td class="amt"&gt;${r.val}&lt;/td&gt;&lt;td&gt;&lt;span class="tag-s"&gt;${r.cat}&lt;/span&gt;&lt;/td&gt;&lt;td&gt;&lt;span class="status-pill s-eval"&gt;${r.stage}&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;`).join('');</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function renderSidebar(){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('sbCompanies').innerHTML=companies.slice(0,6).map(c=&gt;`&lt;div class="company-row" onclick="openModal('${c.name}')"&gt;&lt;div class="cr-logo" style="background:${c.color}22;color:${c.color}"&gt;${c.ticker.slice(0,2)}&lt;/div&gt;&lt;div class="cr-name"&gt;${c.name.split(' ')[0]}&lt;/div&gt;&lt;div class="cr-bar-wrap"&gt;&lt;div class="cr-bar" style="width:${c.pct}%;background:${c.color}"&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class="cr-amt" style="color:${c.color}"&gt;${c.fy24}&lt;/div&gt;&lt;/div&gt;`).join('');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('sbRivalries').innerHTML=rivalries.slice(0,4).map(r=&gt;`&lt;div class="rivalry-row"&gt;&lt;span class="rr-badge"&gt;${r.stage}&lt;/span&gt;&lt;div class="rr-prog"&gt;${r.prog}&lt;/div&gt;&lt;div class="rr-co"&gt;${r.a} &lt;span style="color:var(--text3)"&gt;vs&lt;/span&gt; ${r.b}&lt;/div&gt;&lt;/div&gt;`).join('');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('sbAlerts').innerHTML=alerts.map(a=&gt;`&lt;div class="alert-row"&gt;&lt;div class="ar-dot" style="background:${a.color}"&gt;&lt;/div&gt;&lt;div&gt;&lt;div class="ar-text"&gt;${a.text}&lt;/div&gt;&lt;div class="ar-time"&gt;${a.time}&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;`).join('');</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function openModal(name){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const c=companies.find(x=&gt;x.name===name);if(!c)return;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const s=stockPrices[c.ticker]||c.stock;const up=s.chg&gt;=0;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('modal').innerHTML=`</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div style="display:flex;align-items:center;gap:12px"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div style="width:40px;height:40px;border-radius:7px;background:${c.color}22;color:${c.color};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800"&gt;${c.ticker.slice(0,2)}&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div&gt;&lt;div style="font-size:17px;font-weight:700"&gt;${c.name}&lt;/div&gt;&lt;div style="font-size:11px;color:var(--text2)"&gt;${c.ticker} · ${c.sector}&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;button class="modal-close" onclick="closeModal()"&gt;&lt;i class="ti ti-x"&gt;&lt;/i&gt;&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;p style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.7"&gt;${c.desc}&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="mstat-grid"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="mstat"&gt;&lt;div class="mv" style="color:${c.color}"&gt;${c.fy24}&lt;/div&gt;&lt;div class="ml"&gt;FY24 Obligated&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="mstat"&gt;&lt;div class="mv"&gt;${c.contracts.toLocaleString()}&lt;/div&gt;&lt;div class="ml"&gt;Active Contracts&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="mstat"&gt;&lt;div class="mv" style="color:${up?'var(--green)':'var(--red)'}"&gt;${c.trend}&lt;/div&gt;&lt;div class="ml"&gt;YoY Growth&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="mstat"&gt;&lt;div class="mv" style="color:${c.color}"&gt;$${s.price.toFixed(2)}&lt;/div&gt;&lt;div class="ml"&gt;Stock Price&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="mstat"&gt;&lt;div class="mv"&gt;${s.mktcap}&lt;/div&gt;&lt;div class="ml"&gt;Market Cap&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="mstat"&gt;&lt;div class="mv"&gt;${s.pe}&lt;/div&gt;&lt;div class="ml"&gt;P/E Ratio&lt;/div&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="modal-sec-title"&gt;Historical Obligations (FY22–24)&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div style="position:relative;height:110px"&gt;&lt;canvas id="mChart" role="img" aria-label="Historical obligations for ${c.name}"&gt;&lt;/canvas&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="modal-sec-title"&gt;52-Week Range&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;span style="font-size:11px;color:var(--text3)"&gt;$${s.lo52}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div style="flex:1;height:5px;background:var(--bg4);border-radius:3px;position:relative"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div style="position:absolute;left:${Math.round(((s.price-parseFloat(s.lo52))/(parseFloat(s.hi52)-parseFloat(s.lo52)))*100)}%;top:-3px;width:11px;height:11px;border-radius:50%;background:${c.color};transform:translateX(-50%)"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;span style="font-size:11px;color:var(--text3)"&gt;$${s.hi52}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="modal-sec-title"&gt;Key Programs&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px"&gt;${c.programs.map(p=&gt;`&lt;span class="tag-s" style="font-size:11px;padding:3px 8px"&gt;${p}&lt;/span&gt;`).join('')}&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div style="display:flex;gap:8px"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;a href="https://www.usaspending.gov" class="source-link" style="flex:1"&gt;&lt;i class="ti ti-external-link" style="font-size:10px"&gt;&lt;/i&gt;USASpending.gov&lt;/a&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;button class="export-btn" onclick="exportCompanyCSV('${c.name}')"&gt;&lt;i class="ti ti-download" style="font-size:10px"&gt;&lt;/i&gt;Export CSV&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;button class="compare-btn" onclick="closeModal();document.getElementById('cmpA').value='${c.name}';showView('compare',document.querySelectorAll('.nl')[4])"&gt;&lt;i class="ti ti-columns" style="font-size:10px"&gt;&lt;/i&gt;Compare&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;`;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('overlay').classList.add('show');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>setTimeout(()=&gt;{</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const el=document.getElementById('mChart');if(!el)return;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>new Chart(el,{type:'bar',data:{labels:['FY2022','FY2023','FY2024'],datasets:[{data:c.fy,backgroundColor:c.color+'77',borderColor:c.color,borderWidth:1.5,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'#ffffff06'},ticks:{color:'#454e68',font:{size:10}}},y:{grid:{color:'#ffffff08'},ticks:{color:'#454e68',font:{size:10},callback:v=&gt;'$'+v+'B'}}}}});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>},50);</p>
+<p class="p1">}</p>
+<p class="p1">function closeModal(){document.getElementById('overlay').classList.remove('show');}</p>
+<p class="p2"><br></p>
+<p class="p1">function showView(v,btn){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.querySelectorAll('.nl').forEach(b=&gt;b.classList.remove('active'));</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(btn)btn.classList.add('active');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>['contracts','rfp','map','companies','compare','stocks','rivalries'].forEach(x=&gt;{const el=document.getElementById('view-'+x);if(el)el.style.display='none';});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const el=document.getElementById('view-'+v);if(el)el.style.display='block';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(v==='rfp')renderRFPs();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(v==='map')renderMap();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(v==='companies')renderCompanies();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(v==='rivalries')renderRivalries();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(v==='stocks')renderStockGrid();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(v==='compare'){populateSelects();runCompare();}</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function switchSub(btn,id){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.querySelectorAll('.tab').forEach(b=&gt;b.classList.remove('active'));btn.classList.add('active');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>['sub-recent','sub-top'].forEach(s=&gt;document.getElementById(s).style.display='none');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById(id).style.display='block';</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">function exportCSV(){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(!allContracts.length)return;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const csv=['Vendor,Description,Agency,Amount,Date,Status',...allContracts.map(c=&gt;`"${c.vendor}","${c.desc}","${c.agency}",${c.amount},"${c.date}","${c.status}"`)].join('\n');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='defspend_contracts.csv';a.click();</p>
+<p class="p1">}</p>
+<p class="p1">function exportCompanyCSV(name){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const c=companies.find(x=&gt;x.name===name);if(!c)return;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const csv='Year,Obligated_USD_Billions\nFY2022,'+c.fy[0]+'\nFY2023,'+c.fy[1]+'\nFY2024,'+c.fy[2];</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download=name.replace(/ /g,'_')+'.csv';a.click();</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">async function runAI(){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const q=document.getElementById('aiQ').value.trim();if(!q)return;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const el=document.getElementById('aiRes'),ld=document.getElementById('aiLoad');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>el.classList.remove('show');ld.classList.add('show');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>try{</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({</p>
+<p class="p1"><span class="Apple-converted-space">      </span>model:'claude-sonnet-4-20250514',max_tokens:1000,</p>
+<p class="p1"><span class="Apple-converted-space">      </span>system:`You are a defense contract intelligence analyst for DefSpend.com. Your audience: financial analysts, defense investors, lobbyists, think tanks, researchers. Be concise, data-driven, precise. Use real figures when possible. 3–6 sentences. Respond in the same language as the question.`,</p>
+<p class="p1"><span class="Apple-converted-space">      </span>messages:[{role:'user',content:q}]</p>
+<p class="p1"><span class="Apple-converted-space">    </span>})});</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const d=await r.json();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>el.innerHTML=`&lt;span style="font-size:10px;color:var(--blue);margin-right:8px"&gt;&lt;i class="ti ti-sparkles" style="font-size:10px"&gt;&lt;/i&gt; AI Analysis&lt;/span&gt;${d.content?.map(i=&gt;i.text||'').join('')}`;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>el.classList.add('show');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}catch(e){el.innerHTML='API error.';el.classList.add('show');}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>ld.classList.remove('show');</p>
+<p class="p1">}</p>
+<p class="p1">document.getElementById('aiQ').addEventListener('keydown',e=&gt;{if(e.key==='Enter')runAI();});</p>
+<p class="p2"><br></p>
+<p class="p1">new Chart(document.getElementById('sectorChart'),{</p>
+<p class="p1"><span class="Apple-converted-space">  </span>type:'doughnut',</p>
+<p class="p1"><span class="Apple-converted-space">  </span>data:{labels:['Aviation','Land','Naval','C4ISR','Missiles'],datasets:[{data:[28,22,19,16,15],backgroundColor:['#fb923c','#4ade80','#60a5fa','#a78bfa','#f472b6'],borderWidth:0,hoverOffset:3}]},</p>
+<p class="p1"><span class="Apple-converted-space">  </span>options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},cutout:'70%'}</p>
+<p class="p1">});</p>
+<p class="p2"><br></p>
+<p class="p1">renderSidebar();</p>
+<p class="p1">renderContractTable(allContracts);</p>
+<p class="p1">fetchStocksLive();</p>
+<p class="p1">setInterval(fetchStocksLive,30000);</p>
+<p class="p1">&lt;/script&gt;</p>
+<p class="p1">&lt;/body&gt;</p>
+<p class="p1">&lt;/html&gt;</p>
+</body>
+</html>
