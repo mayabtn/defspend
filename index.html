@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DefSpend — Defense Contract Intelligence</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07090f;--bg2:#0d1017;--bg3:#121520;--bg4:#181c28;--bg5:#1e2334;
+  --border:#ffffff0e;--border2:#ffffff18;
+  --text:#dde2f0;--text2:#7e8aaa;--text3:#454e68;
+  --blue:#4f8ef7;--blue2:#0f2a5c;--blue3:#1a3a7a;
+  --green:#22d47a;--green2:#0a2e1a;
+  --amber:#f5a623;--amber2:#3a2200;
+  --red:#f05252;--purple:#a78bfa;--purple2:#1e1040;
+  --orange:#fb923c;--teal:#2dd4bf;
+}
+body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,sans-serif;font-size:13px;line-height:1.5;min-height:100vh;overflow-x:hidden}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+@keyframes pulse-ring{0%{transform:scale(.8);opacity:1}100%{transform:scale(2.4);opacity:0}}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;height:48px;border-bottom:1px solid var(--border2);background:var(--bg);position:sticky;top:0;z-index:200;padding:0 20px;gap:0}
+.logo{display:flex;align-items:center;gap:9px;margin-right:24px;text-decoration:none}
+.logo-mark{width:26px;height:26px;border-radius:5px;background:var(--blue);display:flex;align-items:center;justify-content:center}
+.logo-mark i{color:#fff;font-size:14px}
+.logo-text{font-size:15px;font-weight:700;color:var(--text);letter-spacing:-.3px}
+.logo-tld{color:var(--text3);font-weight:400;font-size:12px}
+.nav-links{display:flex;gap:1px;flex:1;overflow-x:auto}
+.nl{padding:5px 10px;border-radius:5px;cursor:pointer;color:var(--text2);font-size:11px;border:none;background:none;transition:.12s;white-space:nowrap;display:flex;align-items:center;gap:3px}
+.nl:hover{background:var(--bg4);color:var(--text)}
+.nl.active{background:var(--bg4);color:var(--blue);font-weight:500}
+.live-badge{display:flex;align-items:center;gap:5px;background:var(--green2);border:1px solid #22d47a22;color:var(--green);font-size:10px;padding:3px 9px;border-radius:20px;font-weight:500;white-space:nowrap}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:blink 2s infinite}
+.ref-btn{display:flex;align-items:center;gap:5px;background:var(--blue2);color:var(--blue);border:1px solid var(--blue3);border-radius:6px;padding:5px 12px;cursor:pointer;font-size:11px;font-weight:600;white-space:nowrap}
+.ref-btn:hover{background:var(--blue);color:#fff}
+
+/* TICKER */
+.ticker-tape{background:var(--bg2);border-bottom:1px solid var(--border);height:30px;overflow:hidden;display:flex;align-items:center}
+.ticker-inner{display:flex;animation:scroll 50s linear infinite;white-space:nowrap}
+.ticker-inner:hover{animation-play-state:paused}
+.tick-item{display:flex;align-items:center;gap:5px;padding:0 16px;border-right:1px solid var(--border);font-size:11px;cursor:pointer}
+
+/* HERO */
+.hero{background:var(--bg2);border-bottom:1px solid var(--border2);padding:14px 20px 0}
+.bignum{font-size:38px;font-weight:800;letter-spacing:-2px;color:var(--blue);line-height:1}
+.kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--border);margin-top:12px}
+.kpi{padding:10px 16px;border-right:1px solid var(--border)}
+.kpi:last-child{border-right:none}
+.kpi .k-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px}
+.kpi .k-val{font-size:18px;font-weight:700}
+.kpi .k-d{font-size:10px;margin-top:1px}
+.up{color:var(--green)}.dn{color:var(--red)}
+
+/* AI BAR */
+.ai-bar{display:flex;gap:8px;padding:8px 20px;border-bottom:1px solid var(--border);background:var(--bg);align-items:center}
+.ai-input{flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:6px 12px;color:var(--text);font-size:12px;outline:none}
+.ai-input:focus{border-color:var(--blue)}
+.ai-input::placeholder{color:var(--text3)}
+.ai-btn{background:var(--blue2);color:var(--blue);border:1px solid var(--blue3);border-radius:6px;padding:6px 12px;cursor:pointer;font-size:11px;white-space:nowrap;display:flex;align-items:center;gap:4px}
+.ai-btn:hover{background:var(--blue);color:#fff}
+.xls-btn{background:#14532d;color:#22d47a;border:1px solid #22d47a33;border-radius:6px;padding:6px 10px;cursor:pointer;font-size:11px;display:flex;align-items:center;gap:4px;white-space:nowrap}
+.xls-btn:hover{background:#22d47a;color:#000}
+.ai-result{margin:0 20px 8px;background:var(--bg3);border-left:2px solid var(--blue);border-radius:6px;padding:10px 14px;font-size:12px;line-height:1.8;color:var(--text2);display:none}
+.ai-result.show{display:block}
+.ai-load{display:none;padding:4px 20px;font-size:11px;color:var(--text3);align-items:center;gap:6px}
+.ai-load.show{display:flex}
+
+/* MAIN LAYOUT */
+.main-layout{display:grid;grid-template-columns:1fr 285px;height:calc(100vh - 48px - 30px - 100px - 36px);overflow:hidden}
+.center{overflow-y:auto}
+.sidebar{overflow-y:auto;border-left:1px solid var(--border);background:var(--bg2)}
+
+/* SEARCH PANEL */
+.search-panel{padding:10px 16px;border-bottom:1px solid var(--border);background:var(--bg2)}
+.sp-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}
+.sp-input{flex:1;min-width:140px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:5px 10px;color:var(--text);font-size:12px;outline:none}
+.sp-input:focus{border-color:var(--blue)}
+.sp-input::placeholder{color:var(--text3)}
+.sp-select{background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:5px 8px;color:var(--text);font-size:11px;outline:none;cursor:pointer}
+.sp-btn{background:var(--blue2);color:var(--blue);border:1px solid var(--blue3);border-radius:6px;padding:5px 12px;cursor:pointer;font-size:11px;display:flex;align-items:center;gap:4px}
+.sp-btn:hover{background:var(--blue);color:#fff}
+.sp-status{font-size:10px;color:var(--text3)}
+.sp-pages{display:flex;gap:3px;margin-top:6px;flex-wrap:wrap}
+.pg{padding:2px 8px;border-radius:3px;border:1px solid var(--border2);background:transparent;color:var(--text2);font-size:10px;cursor:pointer}
+.pg:hover{background:var(--bg4)}
+.pg.active{background:var(--blue2);color:var(--blue);border-color:var(--blue3)}
+
+/* TABS */
+.tab-bar{display:flex;background:var(--bg2);border-bottom:1px solid var(--border)}
+.tab{padding:7px 13px;cursor:pointer;color:var(--text2);font-size:11px;font-weight:500;border-bottom:2px solid transparent;transition:.12s;white-space:nowrap}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+
+/* TABLE */
+.tbl-wrap{padding:0 16px}
+.tbl-hdr{display:flex;align-items:center;justify-content:space-between;padding:8px 0 5px}
+.tbl-title{font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--text2)}
+.data-table{width:100%;border-collapse:collapse}
+.data-table th{font-size:9px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--text3);padding:4px 7px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap}
+.data-table td{padding:6px 7px;border-bottom:1px solid var(--border);font-size:11px;vertical-align:middle}
+.data-table tr.clickable{cursor:pointer}
+.data-table tr.clickable:hover td{background:var(--bg3)}
+.co-dot{width:5px;height:5px;border-radius:50%;display:inline-block;margin-right:5px}
+.pill{font-size:9px;padding:2px 6px;border-radius:3px;font-weight:500;white-space:nowrap;display:inline-block}
+.p-green{background:var(--green2);color:var(--green)}
+.p-amber{background:var(--amber2);color:var(--amber)}
+.p-blue{background:var(--blue2);color:var(--blue)}
+.amt{font-weight:600;color:var(--text);white-space:nowrap}
+.tag{font-size:9px;padding:1px 5px;border-radius:3px;background:var(--bg4);color:var(--text3);display:inline-block}
+.spinner{display:inline-block;width:11px;height:11px;border:2px solid var(--border2);border-top-color:var(--blue);border-radius:50%;animation:spin .6s linear infinite}
+
+/* MAP */
+.map-view{position:relative;height:calc(100vh - 48px - 30px - 100px - 36px)}
+#worldMap{width:100%;height:100%}
+.leaflet-container{background:#07090f!important}
+.map-layer-btn{padding:4px 10px;border-radius:4px;border:1px solid var(--border2);background:transparent;color:var(--text2);font-size:10px;cursor:pointer;transition:.15s;display:flex;align-items:center;gap:4px;white-space:nowrap}
+.map-layer-btn:hover{background:var(--bg4);color:var(--text)}
+.map-layer-btn.active{background:var(--blue2);color:var(--blue);border-color:var(--blue3)}
+.map-sidebar{position:absolute;top:10px;right:10px;width:270px;background:#0d1017ee;border:1px solid var(--border2);border-radius:10px;padding:14px;z-index:500;backdrop-filter:blur(8px);max-height:calc(100% - 20px);overflow-y:auto}
+.map-controls{position:absolute;top:10px;left:10px;z-index:500;display:flex;flex-direction:column;gap:6px}
+.map-ctrl-box{background:#0d1017ee;border:1px solid var(--border2);border-radius:8px;padding:10px;backdrop-filter:blur(8px)}
+.map-prompt-input{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:6px 10px;color:var(--text);font-size:11px;outline:none;margin-top:6px}
+.map-prompt-input:focus{border-color:var(--blue)}
+.prompt-chip{font-size:9px;padding:2px 6px;border-radius:3px;background:var(--bg4);border:1px solid var(--border2);color:var(--text2);cursor:pointer;white-space:nowrap}
+.prompt-chip:hover{background:var(--bg3);color:var(--text)}
+.map-tip{position:fixed;background:#0d1017;border:1px solid var(--border2);border-radius:6px;padding:7px 11px;font-size:11px;pointer-events:none;display:none;z-index:2000}
+
+/* STOCKS */
+.stock-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;padding:12px 16px}
+.stock-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:11px;cursor:pointer;transition:.15s}
+.stock-card:hover{border-color:var(--border2);background:var(--bg4)}
+
+/* COMPARE */
+.compare-wrap{padding:12px 16px}
+.co-select{background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:5px 9px;color:var(--text);font-size:12px;outline:none;cursor:pointer;min-width:140px}
+.cmp-btn{background:var(--blue2);color:var(--blue);border:1px solid var(--blue3);border-radius:6px;padding:5px 12px;cursor:pointer;font-size:11px}
+.cmp-btn:hover{background:var(--blue);color:#fff}
+.cmp-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.cmp-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.cmp-stats{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border)}
+.cs{background:var(--bg3);padding:8px 10px}
+.cs .cv{font-size:13px;font-weight:700}
+.cs .cl{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-top:1px}
+
+/* MODAL */
+.overlay{display:none;position:fixed;inset:0;background:#000000bb;z-index:1000;align-items:center;justify-content:center}
+.overlay.show{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:12px;width:600px;max-height:82vh;overflow-y:auto;padding:20px}
+.modal-close{background:none;border:none;color:var(--text2);cursor:pointer;font-size:16px}
+.mstat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:10px 0}
+.mstat{background:var(--bg3);border-radius:6px;padding:9px 11px;border:1px solid var(--border)}
+.mstat .mv{font-size:15px;font-weight:700}
+.mstat .ml{font-size:9px;color:var(--text3);margin-top:1px;text-transform:uppercase;letter-spacing:.6px}
+.modal-sec{font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--text3);margin:12px 0 6px;padding-bottom:4px;border-bottom:1px solid var(--border)}
+
+/* SIDEBAR */
+.sb-block{padding:10px 12px;border-bottom:1px solid var(--border)}
+.sb-title{font-size:10px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--text3);margin-bottom:7px}
+.co-row{display:flex;align-items:center;gap:6px;padding:4px;cursor:pointer;border-radius:4px}
+.co-row:hover{background:var(--bg4)}
+.co-logo{width:20px;height:20px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:800;flex-shrink:0}
+.rv-row{padding:5px 0;border-bottom:1px solid var(--border)}
+.rv-row:last-child{border-bottom:none}
+.al-row{display:flex;gap:6px;padding:4px 0}
+.al-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.src-link{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--blue);text-decoration:none;padding:4px 7px;background:var(--bg3);border-radius:5px;margin-bottom:3px}
+.src-link:hover{background:var(--bg4)}
+
+::-webkit-scrollbar{width:3px;height:3px}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <a class="logo" href="#"><div class="logo-mark"><i class="ti ti-shield-bolt"></i></div><span class="logo-text">DefSpend<span class="logo-tld">.com</span></span></a>
+  <div class="nav-links">
+    <button class="nl active" onclick="showView('search',this)"><i class="ti ti-search" style="font-size:11px"></i>Live Search</button>
+    <button class="nl" onclick="showView('contracts',this)"><i class="ti ti-file-dollar" style="font-size:11px"></i>Contracts</button>
+    <button class="nl" onclick="showView('rfp',this)"><i class="ti ti-radar" style="font-size:11px"></i>RFPs</button>
+    <button class="nl" onclick="showView('map',this)"><i class="ti ti-map-2" style="font-size:11px"></i>Global Map</button>
+    <button class="nl" onclick="showView('companies',this)"><i class="ti ti-building-skyscraper" style="font-size:11px"></i>Companies</button>
+    <button class="nl" onclick="showView('compare',this)"><i class="ti ti-columns" style="font-size:11px"></i>Compare</button>
+    <button class="nl" onclick="showView('stocks',this)"><i class="ti ti-chart-candle" style="font-size:11px"></i>Stocks</button>
+    <button class="nl" onclick="showView('rivalries',this)"><i class="ti ti-tournament" style="font-size:11px"></i>Competition</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;margin-left:8px">
+    <div class="live-badge"><span class="dot"></span>Live</div>
+    <button class="ref-btn" id="refBtn" onclick="refreshAll()"><i class="ti ti-refresh" id="refIcon" style="font-size:12px"></i>Refresh</button>
+    <div id="lastUpd" style="font-size:10px;color:var(--text3)">—</div>
+  </div>
+</div>
+
+<!-- TICKER -->
+<div class="ticker-tape"><div class="ticker-inner" id="ticker"></div></div>
+
+<!-- HERO -->
+<div class="hero">
+  <div style="display:flex;align-items:flex-end;gap:32px;margin-bottom:10px">
+    <div>
+      <div style="font-size:10px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;margin-bottom:2px">DoD Total Obligated — FY2025 YTD</div>
+      <div class="bignum">$346.8B</div>
+      <div style="font-size:11px;color:var(--text2);margin-top:3px" id="heroSub">Click Refresh to load live data from USASpending.gov</div>
+    </div>
+    <div style="display:flex;gap:20px;padding-bottom:2px">
+      <div><div style="font-size:15px;font-weight:700" id="h-total">—</div><div style="font-size:10px;color:var(--text3)">Contracts</div></div>
+      <div><div style="font-size:15px;font-weight:700" id="h-vendors">—</div><div style="font-size:10px;color:var(--text3)">Vendors</div></div>
+    </div>
+  </div>
+  <div class="kpi-strip">
+    <div class="kpi"><div class="k-lbl" style="color:#4ade8077">Army</div><div class="k-val" style="color:#4ade80">$98.3B</div><div class="k-d up">+6.1%</div></div>
+    <div class="kpi"><div class="k-lbl" style="color:#60a5fa77">Navy</div><div class="k-val" style="color:#60a5fa">$112.7B</div><div class="k-d up">+3.8%</div></div>
+    <div class="kpi"><div class="k-lbl" style="color:#fb923c77">Air Force</div><div class="k-val" style="color:#fb923c">$89.4B</div><div class="k-d dn">-1.2%</div></div>
+    <div class="kpi"><div class="k-lbl" style="color:#a78bfa77">Other DoD</div><div class="k-val" style="color:#a78bfa">$46.4B</div><div class="k-d up">+8.9%</div></div>
+  </div>
+</div>
+
+<!-- AI BAR -->
+<div class="ai-bar">
+  <input class="ai-input" id="aiQ" placeholder='Search: "Who is competing on hypersonic missiles?" · "DARPA AI spending" · "Top Navy contractors 2025"'>
+  <button class="ai-btn" onclick="runSearch()"><i class="ti ti-search" style="font-size:11px"></i>Search</button>
+  <button class="xls-btn" onclick="exportExcel()"><i class="ti ti-file-spreadsheet" style="font-size:11px"></i>Export Excel</button>
+</div>
+<div class="ai-load" id="aiLoad"><span class="spinner"></span><span style="margin-left:6px">Searching…</span></div>
+<div class="ai-result" id="aiRes"></div>
+
+<!-- MAIN -->
+<div class="main-layout">
+<div class="center">
+
+  <!-- LIVE SEARCH -->
+  <div id="view-search">
+    <div class="search-panel">
+      <div style="font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--text2);margin-bottom:7px">Live Search — USASpending.gov (287,000+ DoD contracts)</div>
+      <div class="sp-row">
+        <input class="sp-input" id="lsKey" placeholder="Vendor, keyword… e.g. Lockheed, F-35, cyber, hypersonic">
+        <select class="sp-select" id="lsAgency">
+          <option value="">All DoD</option>
+          <option value="DEPT OF THE ARMY">Army</option>
+          <option value="DEPT OF THE NAVY">Navy</option>
+          <option value="DEPT OF THE AIR FORCE">Air Force</option>
+          <option value="DEFENSE ADVANCED RESEARCH PROJECTS AGENCY">DARPA</option>
+          <option value="MISSILE DEFENSE AGENCY">MDA</option>
+        </select>
+        <select class="sp-select" id="lsYear">
+          <option value="2025-01-01|2026-05-21">2025–2026</option>
+          <option value="2024-01-01|2024-12-31">FY2024</option>
+          <option value="2023-01-01|2023-12-31">FY2023</option>
+          <option value="2020-01-01|2026-05-21">All (5 years)</option>
+        </select>
+        <select class="sp-select" id="lsSort">
+          <option value="Award Amount">Highest amount</option>
+          <option value="Action Date">Most recent</option>
+        </select>
+        <button class="sp-btn" onclick="liveSearch(1)"><i class="ti ti-search" style="font-size:11px"></i>Search</button>
+      </div>
+      <div class="sp-status" id="spStatus">Click Search or Refresh to load live DoD contract data.</div>
+      <div class="sp-pages" id="spPages"></div>
+    </div>
+    <div class="tbl-wrap" style="padding-top:4px">
+      <table class="data-table">
+        <thead><tr><th>Vendor</th><th>Description</th><th>Agency</th><th>Amount</th><th>Date</th><th>Status</th></tr></thead>
+        <tbody id="lsTbody"><tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text3)">Click Refresh or Search to load live DoD contract data</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- CONTRACTS -->
+  <div id="view-contracts" style="display:none">
+    <div class="tab-bar">
+      <div class="tab active" onclick="switchSub(this,'sub-recent')">Recent Awards</div>
+      <div class="tab" onclick="switchSub(this,'sub-top')">Top by Value</div>
+    </div>
+    <div id="sub-recent">
+      <div class="tbl-wrap">
+        <div class="tbl-hdr"><div class="tbl-title">Latest DoD Awards</div>
+          <div style="display:flex;gap:4px">
+            <button class="tag" style="cursor:pointer" onclick="filterC('all')">All</button>
+            <button class="tag" style="cursor:pointer;color:#4ade80" onclick="filterC('ARMY')">Army</button>
+            <button class="tag" style="cursor:pointer;color:#60a5fa" onclick="filterC('NAVY')">Navy</button>
+            <button class="tag" style="cursor:pointer;color:#fb923c" onclick="filterC('AIR')">USAF</button>
+          </div>
+        </div>
+        <table class="data-table"><thead><tr><th>Vendor</th><th>Description</th><th>Agency</th><th>Amount</th><th>Date</th></tr></thead><tbody id="cTbody"></tbody></table>
+      </div>
+    </div>
+    <div id="sub-top" style="display:none">
+      <div class="tbl-wrap">
+        <div class="tbl-hdr"><div class="tbl-title">Top Contracts by Value</div></div>
+        <table class="data-table"><thead><tr><th>#</th><th>Vendor</th><th>Description</th><th>Amount</th><th>Agency</th></tr></thead><tbody id="topTbody"></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- RFP -->
+  <div id="view-rfp" style="display:none">
+    <div class="tbl-wrap">
+      <div class="tbl-hdr"><div class="tbl-title">Active Solicitations — SAM.gov</div></div>
+      <table class="data-table"><thead><tr><th>Title</th><th>Agency</th><th>Est. Value</th><th>Deadline</th><th>Stage</th></tr></thead><tbody id="rfpTbody"></tbody></table>
+    </div>
+  </div>
+
+  <!-- GLOBAL MAP -->
+  <div id="view-map" style="display:none">
+    <div class="map-view">
+      <div id="worldMap"></div>
+
+      <!-- Layer controls -->
+      <div class="map-controls">
+        <div class="map-ctrl-box">
+          <div style="font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:7px">Layers</div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <button class="map-layer-btn active" id="layer-supply" onclick="toggleLayer(this,'supply')"><i class="ti ti-git-branch" style="font-size:10px"></i>Supply Chains</button>
+            <button class="map-layer-btn active" id="layer-conflict" onclick="toggleLayer(this,'conflict')"><i class="ti ti-flame" style="font-size:10px"></i>Conflict Zones</button>
+            <button class="map-layer-btn" id="layer-stocks" onclick="toggleLayer(this,'stocks')"><i class="ti ti-chart-line" style="font-size:10px"></i>Stock Swells</button>
+            <button class="map-layer-btn" id="layer-fmf" onclick="toggleLayer(this,'fmf')"><i class="ti ti-cash" style="font-size:10px"></i>FMF Grants</button>
+            <button class="map-layer-btn" id="layer-bases" onclick="toggleLayer(this,'bases')"><i class="ti ti-shield" style="font-size:10px"></i>US Bases</button>
+          </div>
+        </div>
+        <div class="map-ctrl-box">
+          <div style="font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:7px">Focus</div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <button class="map-layer-btn active" onclick="setFocus(this,'global')"><i class="ti ti-world" style="font-size:10px"></i>Global</button>
+            <button class="map-layer-btn" onclick="setFocus(this,'israel')">🇮🇱 Israel</button>
+            <button class="map-layer-btn" onclick="setFocus(this,'ukraine')">🇺🇦 Ukraine</button>
+            <button class="map-layer-btn" onclick="setFocus(this,'taiwan')">🇹🇼 Taiwan</button>
+            <button class="map-layer-btn" onclick="setFocus(this,'indopacific')">🌏 Indo-Pacific</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Map sidebar -->
+      <div class="map-sidebar" id="mapSidebar">
+        <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:6px">
+          <i class="ti ti-world" style="color:var(--blue);font-size:13px"></i>
+          <span id="sidebarTitle">Global Defense Intelligence</span>
+        </div>
+        <div id="sidebarContent">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px">
+            <div style="background:var(--bg3);border-radius:5px;padding:7px;border:1px solid var(--border)"><div style="font-size:14px;font-weight:700;color:var(--blue)">$84.3B</div><div style="font-size:9px;color:var(--text3)">FMF Grants FY25</div></div>
+            <div style="background:var(--bg3);border-radius:5px;padding:7px;border:1px solid var(--border)"><div style="font-size:14px;font-weight:700;color:var(--green)">147</div><div style="font-size:9px;color:var(--text3)">Trade Routes</div></div>
+            <div style="background:var(--bg3);border-radius:5px;padding:7px;border:1px solid var(--border)"><div style="font-size:14px;font-weight:700;color:var(--amber)">23</div><div style="font-size:9px;color:var(--text3)">Conflict Zones</div></div>
+            <div style="background:var(--bg3);border-radius:5px;padding:7px;border:1px solid var(--border)"><div style="font-size:14px;font-weight:700;color:var(--purple)">750+</div><div style="font-size:9px;color:var(--text3)">US Bases</div></div>
+          </div>
+          <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px">Live Defense Stocks</div>
+          <div id="liveStockMini"></div>
+        </div>
+        <div style="margin-top:10px;border-top:1px solid var(--border);padding-top:10px">
+          <div style="font-size:9px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.8px">Map Prompt</div>
+          <input class="map-prompt-input" id="mapPrompt" placeholder="e.g. Show Israel aid · Mark Venezuela · F-35 allies · AUKUS">
+          <div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:5px">
+            <button class="prompt-chip" onclick="runPrompt('Show Israel aid routes')">🇮🇱 Israel aid</button>
+            <button class="prompt-chip" onclick="runPrompt('Highlight F-35 operator nations')">✈️ F-35 allies</button>
+            <button class="prompt-chip" onclick="runPrompt('Show AUKUS submarine deal')">🤿 AUKUS</button>
+            <button class="prompt-chip" onclick="runPrompt('Mark Venezuela operation')">🔴 Venezuela</button>
+            <button class="prompt-chip" onclick="runPrompt('Show Ukraine supply corridor')">🇺🇦 Ukraine</button>
+            <button class="prompt-chip" onclick="runPrompt('Taiwan strait defense')">🇹🇼 Taiwan</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="map-tip" id="mapTip2"></div>
+    </div>
+  </div>
+
+  <!-- COMPANIES -->
+  <div id="view-companies" style="display:none">
+    <div class="tbl-wrap">
+      <div class="tbl-hdr"><div class="tbl-title">Top Defense Contractors — FY2024–2025</div></div>
+      <table class="data-table"><thead><tr><th>Company</th><th>Ticker</th><th>FY24</th><th>Contracts</th><th>YoY</th><th>Sector</th><th></th></tr></thead><tbody id="compTbody"></tbody></table>
+    </div>
+  </div>
+
+  <!-- COMPARE -->
+  <div id="view-compare" style="display:none">
+    <div class="compare-wrap">
+      <div class="tbl-title" style="margin-bottom:10px">Side-by-Side Comparison</div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <select class="co-select" id="cmpA"></select>
+        <span style="color:var(--text3);font-weight:600;font-size:13px">vs</span>
+        <select class="co-select" id="cmpB"></select>
+        <button class="cmp-btn" onclick="runCompare()"><i class="ti ti-columns" style="font-size:11px"></i> Compare</button>
+      </div>
+      <div id="cmpResult"></div>
+    </div>
+  </div>
+
+  <!-- STOCKS -->
+  <div id="view-stocks" style="display:none">
+    <div style="padding:10px 16px;font-size:11px;color:var(--text2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px">
+      <span class="dot"></span>Live prices via Finnhub — refreshed every 60s
+    </div>
+    <div id="stockGrid" class="stock-grid"></div>
+  </div>
+
+  <!-- RIVALRIES -->
+  <div id="view-rivalries" style="display:none">
+    <div class="tbl-wrap">
+      <div class="tbl-hdr"><div class="tbl-title">Active Competition — Source Selection</div></div>
+      <table class="data-table"><thead><tr><th>Program</th><th>Competitors</th><th>Est. Value</th><th>Category</th><th>Stage</th></tr></thead><tbody id="rvTbody"></tbody></table>
+    </div>
+  </div>
+
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sb-block">
+    <div class="sb-title">Sector Breakdown</div>
+    <div style="position:relative;height:130px"><canvas id="sectorChart"></canvas></div>
+    <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:6px">
+      <span style="display:flex;align-items:center;gap:3px;font-size:10px;color:var(--text2)"><span style="width:6px;height:6px;border-radius:2px;background:#fb923c;display:inline-block"></span>Aviation</span>
+      <span style="display:flex;align-items:center;gap:3px;font-size:10px;color:var(--text2)"><span style="width:6px;height:6px;border-radius:2px;background:#4ade80;display:inline-block"></span>Land</span>
+      <span style="display:flex;align-items:center;gap:3px;font-size:10px;color:var(--text2)"><span style="width:6px;height:6px;border-radius:2px;background:#60a5fa;display:inline-block"></span>Naval</span>
+      <span style="display:flex;align-items:center;gap:3px;font-size:10px;color:var(--text2)"><span style="width:6px;height:6px;border-radius:2px;background:#a78bfa;display:inline-block"></span>C4ISR</span>
+      <span style="display:flex;align-items:center;gap:3px;font-size:10px;color:var(--text2)"><span style="width:6px;height:6px;border-radius:2px;background:#f472b6;display:inline-block"></span>Missiles</span>
+    </div>
+  </div>
+  <div class="sb-block"><div class="sb-title">Top Contractors</div><div id="sbComp"></div></div>
+  <div class="sb-block"><div class="sb-title">Active Competitions</div><div id="sbRiv"></div></div>
+  <div class="sb-block"><div class="sb-title">Alerts</div><div id="sbAlerts"></div></div>
+  <div class="sb-block">
+    <div class="sb-title">Data Sources</div>
+    <a class="src-link" href="https://www.usaspending.gov" target="_blank"><i class="ti ti-external-link" style="font-size:10px"></i>USASpending.gov</a>
+    <a class="src-link" href="https://sam.gov" target="_blank"><i class="ti ti-external-link" style="font-size:10px"></i>SAM.gov</a>
+    <a class="src-link" href="https://www.defense.gov/News/Contracts/" target="_blank"><i class="ti ti-external-link" style="font-size:10px"></i>Pentagon Daily Contracts</a>
+    <a class="src-link" href="https://finnhub.io" target="_blank"><i class="ti ti-external-link" style="font-size:10px"></i>Finnhub — Live Stocks</a>
+  </div>
+</div>
+</div>
+
+<div class="overlay" id="overlay" onclick="if(event.target===this)closeModal()"><div class="modal" id="modal"></div></div>
+
+<script>
+const FINNHUB='d87osg9r01qmhakgphegd87osg9r01qmhakgphf0';
+const TODAY='2026-05-21';
+
+// ── DATA ──
+const companies=[
+  {name:"Lockheed Martin",ticker:"LMT",color:"#4f8ef7",pct:100,fy24:"$62.4B",raw:62.4,contracts:1847,trend:"+3.2%",sector:"Aviation/Missiles",desc:"World's largest defense contractor. F-35, missile defense, satellites, Sikorsky.",programs:["F-35 Lightning II","Sikorsky helicopters","PAC-3 Missiles","Space systems"],fy:[56.3,60.4,62.4]},
+  {name:"Raytheon / RTX",ticker:"RTX",color:"#fb923c",pct:74,fy24:"$46.1B",raw:46.1,contracts:2134,trend:"+1.8%",sector:"Missiles/C4ISR",desc:"Patriot, Tomahawk, AMRAAM, Pratt & Whitney engines.",programs:["Patriot PAC-3","Tomahawk Missile","AMRAAM","Pratt & Whitney"],fy:[41.2,45.3,46.1]},
+  {name:"Boeing Defense",ticker:"BA",color:"#22d47a",pct:54,fy24:"$33.5B",raw:33.5,contracts:943,trend:"-4.1%",sector:"Aviation/Naval",desc:"F-15EX, AH-64 Apache, cost overrun pressure.",programs:["F-15EX Eagle II","AH-64 Apache","T-7A Red Hawk","MQ-25 Stingray"],fy:[34.9,34.9,33.5]},
+  {name:"Northrop Grumman",ticker:"NOC",color:"#a78bfa",pct:48,fy24:"$29.8B",raw:29.8,contracts:1211,trend:"+7.4%",sector:"Aviation/Space",desc:"B-21 Raider, Sentinel ICBM, space and cyber.",programs:["B-21 Raider","Sentinel ICBM","E-2D Hawkeye","GBSD"],fy:[25.4,27.7,29.8]},
+  {name:"General Dynamics",ticker:"GD",color:"#f472b6",pct:44,fy24:"$27.3B",raw:27.3,contracts:1688,trend:"+2.9%",sector:"Land/Naval",desc:"M1A2 Abrams, Virginia submarines, Stryker, GDIT.",programs:["M1A2 Abrams","Virginia submarines","Stryker","GDIT"],fy:[24.8,26.5,27.3]},
+  {name:"HII (Huntington Ingalls)",ticker:"HII",color:"#2dd4bf",pct:34,fy24:"$21.1B",raw:21.1,contracts:412,trend:"+9.2%",sector:"Naval",desc:"America's largest military shipbuilder.",programs:["Gerald R. Ford CVN","Virginia submarines","DDG-51","NSC cutters"],fy:[17.8,19.3,21.1]},
+  {name:"L3Harris Technologies",ticker:"LHX",color:"#e8c84a",pct:28,fy24:"$17.6B",raw:17.6,contracts:2891,trend:"+5.6%",sector:"C4ISR/Comms",desc:"Tactical radios, ISR sensors, night vision, EW.",programs:["AN/PRC-163 radio","Night vision","WESCAM sensors","EW systems"],fy:[15.6,16.7,17.6]},
+  {name:"BAE Systems US",ticker:"BA.L",color:"#f87171",pct:19,fy24:"$12.1B",raw:12.1,contracts:783,trend:"+0.3%",sector:"Land/Electronics",desc:"Bradley IFV, Paladin howitzer, electronic warfare.",programs:["Bradley M2A4","M109 Paladin","Electronic warfare","Armored vehicles"],fy:[11.4,12.1,12.1]},
+];
+
+const rivalries=[
+  {prog:"NGAD — 6th Gen Fighter",a:"Lockheed Martin",b:"Boeing",val:"$20B+",cat:"Aviation",stage:"Eval"},
+  {prog:"Sentinel ICBM",a:"Northrop Grumman",b:"Boeing",val:"$95B",cat:"Strategic",stage:"Dev"},
+  {prog:"Hypersonic Cruise Missile",a:"Raytheon",b:"Lockheed Martin",val:"$1.9B",cat:"Missiles",stage:"Source Sel."},
+  {prog:"DDG-51 Flight III Lot 2",a:"GD Bath Iron Works",b:"HII",val:"$5.6B",cat:"Naval",stage:"RFP Open"},
+  {prog:"IVAS 2.0 AR Battlefield",a:"Microsoft / Elbit",b:"Palantir / Anduril",val:"$11.7B",cat:"C4ISR",stage:"Tech Eval"},
+];
+
+const rfps=[
+  {title:"NGAD — Next Gen Air Dominance",agency:"USAF",val:"$20B+",deadline:"Jun 14 2026",stage:"open",url:"https://sam.gov/search/?keywords=NGAD"},
+  {title:"IVAS 1.1 — AR Combat Goggles",agency:"Army",val:"$11.7B",deadline:"May 28 2026",stage:"eval",url:"https://sam.gov/search/?keywords=IVAS"},
+  {title:"SDA Tranche 3 — LEO Satellites",agency:"Space Force",val:"$3.4B",deadline:"Jun 30 2026",stage:"open",url:"https://sam.gov/search/?keywords=SDA+tranche"},
+  {title:"Hypersonic Attack Cruise Missile",agency:"USAF",val:"$1.9B",deadline:"May 19 2026",stage:"eval",url:"https://sam.gov/search/?keywords=hypersonic+cruise+missile"},
+  {title:"DDG-51 Flight III Lot 2",agency:"Navy",val:"$5.6B",deadline:"Jul 15 2026",stage:"open",url:"https://sam.gov/search/?keywords=DDG-51"},
+  {title:"FLRAA — Future Long Range Assault",agency:"Army",val:"$7.1B",deadline:"Aug 1 2026",stage:"open",url:"https://sam.gov/search/?keywords=FLRAA"},
+];
+
+const alerts=[
+  {text:"Northrop B-21 Raider lot 2 awarded",time:"2h ago",color:"#4ade80"},
+  {text:"NGAD RFP extended 30 days",time:"5h ago",color:"#f5a623"},
+  {text:"Palantir +$619M Maven AI contract",time:"1d ago",color:"#a78bfa"},
+  {text:"Boeing MH-139A bid rejected",time:"2d ago",color:"#f05252"},
+];
+
+const fallback=[
+  {vendor:"Lockheed Martin Corp",desc:"F-35 Lightning II Lot 18-19 LRIP",agency:"DEPT OF THE AIR FORCE",amount:15960000000,date:"2025-05-12",id:"CONT_AWD_F3300120C0001"},
+  {vendor:"Huntington Ingalls Industries",desc:"CVN-82 Ford-class carrier construction",agency:"DEPT OF THE NAVY",amount:12200000000,date:"2025-04-05",id:"CONT_AWD_N0002420C6000"},
+  {vendor:"General Dynamics Land Systems",desc:"M1A2 SEPv3 Abrams upgrade 450 units",agency:"DEPT OF THE ARMY",amount:4370000000,date:"2025-05-08",id:"CONT_AWD_W56HZV20C0001"},
+  {vendor:"Raytheon Company",desc:"Patriot PAC-3 MSE missile system",agency:"DEPT OF THE ARMY",amount:3220000000,date:"2025-05-05",id:"CONT_AWD_W31P4Q20C0001"},
+  {vendor:"Northrop Grumman Systems",desc:"B-21 Raider stealth bomber lot 1",agency:"DEPT OF THE AIR FORCE",amount:2800000000,date:"2025-04-30",id:"CONT_AWD_FA861520C0001"},
+  {vendor:"General Dynamics Bath Iron Works",desc:"DDG-51 Flight III destroyer",agency:"DEPT OF THE NAVY",amount:2350000000,date:"2025-04-15",id:"CONT_AWD_N0002421C6000"},
+  {vendor:"General Dynamics Mission Systems",desc:"Virginia-class submarine comms",agency:"DEPT OF THE NAVY",amount:1820000000,date:"2025-03-28",id:"CONT_AWD_N0002421C6001"},
+  {vendor:"Boeing Defense",desc:"MH-139A Grey Wolf helicopter",agency:"DEPT OF THE AIR FORCE",amount:1140000000,date:"2025-04-28",id:"CONT_AWD_FA700120C0001"},
+  {vendor:"L3Harris Technologies",desc:"AN/PRC-163 tactical radio systems",agency:"DEPT OF THE ARMY",amount:890000000,date:"2025-04-22",id:"CONT_AWD_W15P7T20C0001"},
+  {vendor:"BAE Systems",desc:"Bradley M2A4 IFV electronic upgrade",agency:"DEPT OF THE ARMY",amount:742000000,date:"2025-04-18",id:"CONT_AWD_W56HZV20C0002"},
+  {vendor:"Palantir Technologies",desc:"Maven Smart System AI platform",agency:"DEPT OF THE AIR FORCE",amount:619000000,date:"2025-04-10",id:"CONT_AWD_FA875021C0001"},
+  {vendor:"Leidos Inc",desc:"DISA ENCORE III IT services",agency:"DEPT OF THE AIR FORCE",amount:580000000,date:"2025-04-02",id:"CONT_AWD_HC102821C0001"},
+];
+
+const tradeRoutes=[
+  {id:"usa-israel",from:[31.77,35.21],to:[38,-97],color:"#4f8ef7",label:"USA → Israel",value:"$3.8B FY25",programs:["Iron Dome","F-35I Adir","Arrow 3","David's Sling"],risk:72,subs:["Raytheon","Boeing","Elbit Systems"],fmf:3800},
+  {id:"usa-ukraine",from:[49.0,31.5],to:[38,-97],color:"#22d47a",label:"USA → Ukraine",value:"$61B+ since 2022",programs:["HIMARS","Patriot","M1A1 Abrams","F-16"],risk:95,subs:["Lockheed","Raytheon","General Dynamics"],fmf:61000},
+  {id:"usa-taiwan",from:[23.7,120.96],to:[38,-97],color:"#a78bfa",label:"USA → Taiwan",value:"$19.5B pending",programs:["F-16V","Harpoon","ATACMS","M1A2T"],risk:88,subs:["Lockheed","Boeing","Raytheon"],fmf:19500},
+  {id:"usa-japan",from:[36.2,138.25],to:[38,-97],color:"#e8c84a",label:"USA → Japan",value:"$6.4B FY25",programs:["F-35A/B","Aegis BMD","SM-3","Tomahawk"],risk:34,subs:["Lockheed","Raytheon","Mitsubishi"],fmf:6400},
+  {id:"usa-skorea",from:[35.9,127.77],to:[38,-97],color:"#fb923c",label:"USA ↔ S.Korea",value:"$4.1B FY25",programs:["THAAD","F-35A","AH-64E","Stryker"],risk:41,subs:["Lockheed","Boeing","KAI"],fmf:4100},
+  {id:"usa-canada",from:[56.13,-106.35],to:[38,-97],color:"#2dd4bf",label:"USA ↔ Canada",value:"$8.2B NTIB",programs:["NORAD modernization","CF-18 upgrade","Arctic patrol"],risk:12,subs:["L3Harris","CAE","MDA Space"],fmf:0},
+  {id:"usa-poland",from:[51.92,19.15],to:[38,-97],color:"#22d47a",label:"USA → Poland",value:"$12B FY25",programs:["HIMARS","M1A2 Abrams","FA-50","Patriot"],risk:38,subs:["Lockheed","GD","Raytheon"],fmf:12000},
+  {id:"usa-saudi",from:[23.89,45.08],to:[38,-97],color:"#f5a623",label:"USA → Saudi Arabia",value:"$37B pending",programs:["THAAD","F-15SA","Patriot","CH-47"],risk:55,subs:["Lockheed","Boeing","Raytheon"],fmf:0},
+  {id:"aukus",from:[-25.27,133.78],to:[38,-97],color:"#60a5fa",label:"AUKUS — Submarine",value:"$368B total",programs:["Virginia-class SSN","SSN-AUKUS","Tomahawk"],risk:22,subs:["HII","GD","BAE Systems","Rolls-Royce"],fmf:0},
+  {id:"france-italy",from:[43.0,12.0],to:[46.23,2.21],color:"#f472b6",label:"France ↔ Italy",value:"€2.1B FREMM",programs:["FREMM frigate","MBDA missiles","NH90"],risk:18,subs:["Naval Group","Fincantieri","MBDA"],fmf:0},
+];
+
+const conflictZones=[
+  {name:"Ukraine",lat:49,lng:32,color:"#f05252",level:"Active War",casualties:"500K+",aid:"$61B US"},
+  {name:"Gaza / Israel",lat:31.5,lng:34.5,color:"#f05252",level:"Active War",casualties:"50K+",aid:"$3.8B US FY25"},
+  {name:"Taiwan Strait",lat:24,lng:121,color:"#f5a623",level:"High Tension",casualties:"0",aid:"$19.5B FMS pending"},
+  {name:"South China Sea",lat:12,lng:114,color:"#f5a623",level:"High Tension",casualties:"0",aid:"Freedom of nav. ops"},
+  {name:"North Korea",lat:40,lng:127,color:"#f5a623",level:"Nuclear Risk",casualties:"0",aid:"Allied deterrence"},
+  {name:"Yemen",lat:15.5,lng:48,color:"#fb923c",level:"Active Conflict",casualties:"150K+",aid:"Houthi interdiction"},
+  {name:"Iran",lat:32,lng:53,color:"#f5a623",level:"Proxy War",casualties:"Unknown",aid:"Sanctions regime"},
+  {name:"Venezuela",lat:8,lng:-66,color:"#f5a623",level:"Instability",casualties:"Unknown",aid:"DEA / SOUTHCOM ops"},
+  {name:"Sudan",lat:15,lng:30,color:"#f87171",level:"Civil War",casualties:"15K+",aid:"Humanitarian only"},
+  {name:"Myanmar",lat:19,lng:96,color:"#fb923c",level:"Civil War",casualties:"50K+",aid:"Minimal"},
+];
+
+const usBases=[
+  {name:"Ramstein AB",lat:49.44,lng:7.60,type:"Air Force",country:"Germany",personnel:9000},
+  {name:"Yokota AB",lat:35.75,lng:139.35,type:"Air Force",country:"Japan",personnel:11000},
+  {name:"Camp Humphreys",lat:36.96,lng:126.98,type:"Army",country:"S.Korea",personnel:20000},
+  {name:"Naval Station Rota",lat:36.64,lng:-6.35,type:"Navy",country:"Spain",personnel:4000},
+  {name:"Incirlik AB",lat:37.00,lng:35.43,type:"Air Force",country:"Turkey",personnel:2500},
+  {name:"NAVCENT Bahrain",lat:26.20,lng:50.66,type:"Navy",country:"Bahrain",personnel:8000},
+  {name:"Diego Garcia",lat:-7.31,lng:72.42,type:"Joint",country:"UK Territory",personnel:3200},
+  {name:"Andersen AFB Guam",lat:13.58,lng:144.93,type:"Air Force",country:"US Territory",personnel:7000},
+  {name:"Camp Lemonnier",lat:11.53,lng:43.15,type:"Joint",country:"Djibouti",personnel:4500},
+  {name:"Al Udeid AB",lat:25.12,lng:51.31,type:"Air Force",country:"Qatar",personnel:10000},
+];
+
+const f35Nations=[[38,-97],[51.5,-0.1],[48.8,2.3],[52.3,4.9],[56.1,10.8],[60.5,8.4],[60.3,24.9],[31.77,35.21],[35.7,139.7],[35.9,127.8],[23.7,120.9],[31.1,-8.0],[41.9,12.5],[52.2,21.0],[46.1,14.5],[47.5,14.5]];
+
+let csvData=[];let stockPrices={};let cFilter='all';
+let worldMap=null;let mapMarkers=[];let activeLayers={supply:true,conflict:true,stocks:false,fmf:false,bases:false};let swellIntervals=[];
+
+// ── UTILS ──
+function fmt(v){if(!v||isNaN(v))return'—';if(v>=1e9)return'$'+(v/1e9).toFixed(1)+'B';if(v>=1e6)return'$'+(v/1e6).toFixed(0)+'M';return'$'+Math.round(v).toLocaleString();}
+function aCol(a){if(!a)return'#555e75';if(a.includes('ARMY'))return'#4ade80';if(a.includes('NAVY'))return'#60a5fa';if(a.includes('AIR'))return'#fb923c';if(a.includes('DARPA'))return'#a78bfa';return'#2dd4bf';}
+function aShort(a){if(!a)return'DoD';if(a.includes('ARMY'))return'Army';if(a.includes('NAVY'))return'Navy';if(a.includes('AIR'))return'USAF';if(a.includes('DARPA'))return'DARPA';return'DoD';}
+function toast(msg,color){const t=document.createElement('div');t.style.cssText=`position:fixed;bottom:20px;right:20px;background:#0d1017;border:1px solid ${color};border-left:3px solid ${color};border-radius:8px;padding:10px 16px;font-size:12px;color:${color};z-index:9999;max-width:340px`;t.textContent=msg;document.body.appendChild(t);setTimeout(()=>{t.style.transition='opacity .4s';t.style.opacity='0';setTimeout(()=>t.remove(),400)},3500);}
+function tip2(html,ev){const t=document.getElementById('mapTip2');t.style.display='block';t.style.left=(ev.originalEvent.clientX+12)+'px';t.style.top=(ev.originalEvent.clientY-28)+'px';t.innerHTML=html;}
+function hideTip2(){document.getElementById('mapTip2').style.display='none';}
+
+// ── STOCKS ──
+async function fetchStocks(){
+  for(const c of companies){
+    if(c.ticker.includes('.'))continue;
+    try{
+      const r=await fetch(`https://finnhub.io/api/v1/quote?symbol=${c.ticker}&token=${FINNHUB}`);
+      const d=await r.json();
+      if(d.c&&d.c>0)stockPrices[c.ticker]={price:d.c,chg:+(d.c-d.pc).toFixed(2),pct:+(((d.c-d.pc)/d.pc)*100).toFixed(2),open:d.o,high:d.h,low:d.l,prev:d.pc};
+    }catch(e){}
+  }
+  renderTicker();
+  renderLiveStockMini();
+  if(document.getElementById('view-stocks').style.display!=='none')renderStockGrid();
+}
+
+function renderTicker(){
+  const items=companies.map(c=>{
+    const s=stockPrices[c.ticker];
+    if(!s)return`<div class="tick-item"><span style="font-weight:700;color:${c.color}">${c.ticker}</span><span style="color:var(--text3);font-size:10px"> …</span></div>`;
+    const up=s.chg>=0;
+    return`<div class="tick-item" onclick="showView('stocks',document.querySelectorAll('.nl')[6])"><span style="font-weight:700;color:${c.color}">${c.ticker}</span><span style="font-size:12px;font-weight:600;color:${c.color}"> $${s.price.toFixed(2)}</span><span style="font-size:10px;color:${up?'var(--green)':'var(--red)'}"> ${up?'▲':'▼'}${Math.abs(s.pct).toFixed(2)}%</span></div>`;
+  }).join('');
+  document.getElementById('ticker').innerHTML=items+items;
+}
+
+function renderLiveStockMini(){
+  const el=document.getElementById('liveStockMini');if(!el)return;
+  el.innerHTML=companies.slice(0,5).map(c=>{
+    const s=stockPrices[c.ticker];const up=s?s.chg>=0:true;
+    return`<div style="display:flex;align-items:center;gap:6px;padding:3px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:10px;font-weight:700;color:${c.color};min-width:28px">${c.ticker}</span>
+      <div style="flex:1;height:3px;background:var(--bg4);border-radius:2px"><div style="width:${s?Math.min(100,50+s.pct*8):50}%;height:3px;background:${c.color};border-radius:2px;transition:width 1s"></div></div>
+      <span style="font-size:10px;color:${up?'var(--green)':'var(--red)'};min-width:36px;text-align:right">${s?'$'+s.price.toFixed(0):'—'}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderStockGrid(){
+  document.getElementById('stockGrid').innerHTML=companies.map((c,i)=>{
+    const s=stockPrices[c.ticker];
+    return`<div class="stock-card" onclick="openModal('${c.name}')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div><div style="font-size:14px;font-weight:800;color:${c.color}">${c.ticker}</div><div style="font-size:10px;color:var(--text3)">${c.name.split(' ')[0]}</div></div>
+        <div style="text-align:right">
+          <div style="font-size:19px;font-weight:700;color:${c.color}">${s?'$'+s.price.toFixed(2):'—'}</div>
+          <div style="font-size:11px;color:${s&&s.chg>=0?'var(--green)':'var(--red)'}">${s?(s.chg>=0?'▲ +':'▼ ')+Math.abs(s.pct).toFixed(2)+'%':'Loading…'}</div>
+        </div>
+      </div>
+      ${s?`<div style="display:flex;gap:10px;margin-top:8px">
+        <div><div style="font-size:11px;font-weight:600">$${s.open.toFixed(2)}</div><div style="font-size:9px;color:var(--text3)">Open</div></div>
+        <div><div style="font-size:11px;font-weight:600;color:var(--green)">$${s.high.toFixed(2)}</div><div style="font-size:9px;color:var(--text3)">High</div></div>
+        <div><div style="font-size:11px;font-weight:600;color:var(--red)">$${s.low.toFixed(2)}</div><div style="font-size:9px;color:var(--text3)">Low</div></div>
+      </div>`:'<div style="font-size:11px;color:var(--text3);margin-top:8px">Loading from Finnhub…</div>'}
+      <div style="height:32px;margin-top:8px;position:relative"><canvas id="sp-${c.ticker}"></canvas></div>
+    </div>`;
+  }).join('');
+  setTimeout(()=>{
+    companies.forEach((c,i)=>{
+      const el=document.getElementById('sp-'+c.ticker);if(!el)return;
+      const s=stockPrices[c.ticker];if(!s)return;
+      const d=Array.from({length:20},(_,j)=>+(s.price*(1+Math.sin(j*0.8+i)*0.012)).toFixed(2));
+      new Chart(el,{type:'line',data:{labels:d.map((_,j)=>j),datasets:[{data:d,borderColor:c.color,borderWidth:1.5,pointRadius:0,tension:.4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{display:false},y:{display:false}}}});
+    });
+  },80);
+}
+
+// ── WORLD MAP ──
+function initWorldMap(){
+  if(worldMap)return;
+  worldMap=L.map('worldMap',{center:[25,10],zoom:3,zoomControl:false,attributionControl:false});
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:18}).addTo(worldMap);
+  L.control.zoom({position:'bottomleft'}).addTo(worldMap);
+  renderAllLayers();
+  renderLiveStockMini();
+}
+
+function clearMapMarkers(){
+  mapMarkers.forEach(m=>{try{m.remove()}catch(e){}});
+  mapMarkers=[];
+  swellIntervals.forEach(clearInterval);
+  swellIntervals=[];
+}
+
+function renderAllLayers(){
+  clearMapMarkers();
+  if(activeLayers.supply)renderSupply();
+  if(activeLayers.conflict)renderConflicts();
+  if(activeLayers.bases)renderBases();
+  if(activeLayers.fmf)renderFMF();
+  if(activeLayers.stocks)renderSwells();
+}
+
+function renderSupply(){
+  tradeRoutes.forEach(r=>{
+    const arc=L.polyline([r.from,r.to],{color:r.color,weight:1.5,opacity:.7,dashArray:'8,5'}).addTo(worldMap);
+    arc.on('click',()=>showRouteSidebar(r));
+    arc.on('mouseover',ev=>tip2(`<strong style="color:${r.color}">${r.label}</strong><br>${r.value}`,ev));
+    arc.on('mousemove',ev=>tip2(`<strong style="color:${r.color}">${r.label}</strong><br>${r.value}`,ev));
+    arc.on('mouseout',hideTip2);
+    mapMarkers.push(arc);
+
+    const icon=L.divIcon({html:`<div style="width:8px;height:8px;border-radius:50%;background:${r.color};box-shadow:0 0 6px ${r.color}66"></div>`,className:'',iconSize:[8,8]});
+    const m=L.marker(r.from,{icon}).addTo(worldMap);
+    m.on('click',()=>showRouteSidebar(r));
+    mapMarkers.push(m);
+
+    // animated dot
+    let t=0;
+    const dot=L.circleMarker(r.from,{radius:3,color:r.color,fillColor:r.color,fillOpacity:1,weight:0}).addTo(worldMap);
+    mapMarkers.push(dot);
+    const anim=()=>{
+      t+=0.004;if(t>1)t=0;
+      dot.setLatLng([r.from[0]+(r.to[0]-r.from[0])*t,r.from[1]+(r.to[1]-r.from[1])*t]);
+      requestAnimationFrame(anim);
+    };requestAnimationFrame(anim);
+  });
+}
+
+function renderConflicts(){
+  conflictZones.forEach(z=>{
+    const icon=L.divIcon({
+      html:`<div style="position:relative;width:14px;height:14px">
+        <div style="width:14px;height:14px;border-radius:50%;background:${z.color};opacity:.9;box-shadow:0 0 10px ${z.color}88"></div>
+        <div style="position:absolute;inset:-5px;border-radius:50%;border:2px solid ${z.color};animation:pulse-ring 2s ease-out infinite;opacity:.4"></div>
+      </div>`,className:'',iconSize:[14,14]
+    });
+    const m=L.marker([z.lat,z.lng],{icon}).addTo(worldMap);
+    m.on('click',()=>showConflictSidebar(z));
+    m.on('mouseover',ev=>tip2(`<strong style="color:${z.color}">${z.name}</strong><br><span style="color:var(--text2)">${z.level}</span>`,ev));
+    m.on('mousemove',ev=>tip2(`<strong style="color:${z.color}">${z.name}</strong><br><span style="color:var(--text2)">${z.level}</span>`,ev));
+    m.on('mouseout',hideTip2);
+    mapMarkers.push(m);
+  });
+}
+
+function renderBases(){
+  usBases.forEach(b=>{
+    const icon=L.divIcon({html:`<div style="width:10px;height:10px;background:#4f8ef7;clip-path:polygon(50% 0%,100% 100%,0% 100%);box-shadow:0 0 6px #4f8ef766"></div>`,className:'',iconSize:[10,10]});
+    const m=L.marker([b.lat,b.lng],{icon}).addTo(worldMap);
+    m.on('click',()=>showBaseSidebar(b));
+    m.on('mouseover',ev=>tip2(`<strong style="color:var(--blue)">${b.name}</strong><br>${b.country} · ${b.personnel.toLocaleString()} personnel`,ev));
+    m.on('mousemove',ev=>tip2(`<strong style="color:var(--blue)">${b.name}</strong><br>${b.country} · ${b.personnel.toLocaleString()} personnel`,ev));
+    m.on('mouseout',hideTip2);
+    mapMarkers.push(m);
+  });
+}
+
+function renderFMF(){
+  tradeRoutes.filter(r=>r.fmf>0).forEach(r=>{
+    const size=Math.max(8,Math.min(26,r.fmf/2500));
+    const icon=L.divIcon({html:`<div style="width:${size}px;height:${size}px;border-radius:50%;background:#f5a62322;border:1px solid #f5a623;display:flex;align-items:center;justify-content:center;font-size:7px;color:#f5a623;font-weight:700">$</div>`,className:'',iconSize:[size,size]});
+    const m=L.marker(r.from,{icon}).addTo(worldMap);
+    m.on('click',()=>showRouteSidebar(r));
+    mapMarkers.push(m);
+  });
+}
+
+function renderSwells(){
+  const pts=[[38,-97,'#4f8ef7'],[31.77,35.21,'#22d47a'],[49,32,'#f05252'],[23.7,120.9,'#a78bfa'],[35.7,139.7,'#e8c84a'],[35.9,127.7,'#fb923c']];
+  pts.forEach(([lat,lng,color])=>{
+    const circle=L.circle([lat,lng],{radius:700000,color,fillColor:color,fillOpacity:.06,weight:.5}).addTo(worldMap);
+    mapMarkers.push(circle);
+    let growing=true;
+    const iv=setInterval(()=>{
+      const r=circle.getRadius();
+      growing?circle.setRadius(r*1.015):circle.setRadius(r*.985);
+      if(r>1100000)growing=false;
+      if(r<500000)growing=true;
+    },120);
+    swellIntervals.push(iv);
+  });
+}
+
+function toggleLayer(btn,layer){
+  btn.classList.toggle('active');
+  activeLayers[layer]=!activeLayers[layer];
+  renderAllLayers();
+}
+
+function setFocus(btn,focus){
+  document.querySelectorAll('.map-ctrl-box .map-layer-btn').forEach(b=>{if(['global','israel','ukraine','taiwan','indopacific'].some(f=>b.textContent.toLowerCase().includes(f.slice(0,5))))b.classList.remove('active');});
+  btn.classList.add('active');
+  const views={global:{lat:25,lng:10,zoom:3},israel:{lat:31.5,lng:35,zoom:7},ukraine:{lat:49,lng:32,zoom:5},taiwan:{lat:23.7,lng:121,zoom:7},indopacific:{lat:10,lng:130,zoom:4}};
+  const v=views[focus]||views.global;
+  worldMap.flyTo([v.lat,v.lng],v.zoom,{duration:1.5});
+  if(focus==='israel')showIsraelPanel();
+  else if(focus==='ukraine')showUkrainePanel();
+  else if(focus==='taiwan')showTaiwanPanel();
+}
+
+function runPrompt(p){
+  document.getElementById('mapPrompt').value=p;
+  const pl=p.toLowerCase();
+  if(pl.includes('israel')){worldMap.flyTo([31.5,35],7,{duration:1.5});showIsraelPanel();}
+  else if(pl.includes('ukraine')){worldMap.flyTo([49,32],5,{duration:1.5});showUkrainePanel();}
+  else if(pl.includes('taiwan')){worldMap.flyTo([23.7,121],7,{duration:1.5});showTaiwanPanel();}
+  else if(pl.includes('venezuela')){
+    worldMap.flyTo([8,-66],6,{duration:1.5});
+    addPromptMarker(8,-66,'#f05252','🔴 Venezuela Op Zone','DEA & SOUTHCOM operations · Maduro sanctions · Drug interdiction · Operation Sovereign Seas');
+  }
+  else if(pl.includes('aukus')){worldMap.flyTo([-25,133],4,{duration:1.5});showRouteSidebar(tradeRoutes.find(r=>r.id==='aukus'));}
+  else if(pl.includes('f-35')){
+    worldMap.flyTo([40,20],3,{duration:1.5});
+    f35Nations.forEach(([lat,lng])=>{
+      const icon=L.divIcon({html:`<div style="width:8px;height:8px;background:#4f8ef7;border-radius:50%;box-shadow:0 0 8px #4f8ef7"></div>`,className:'',iconSize:[8,8]});
+      mapMarkers.push(L.marker([lat,lng],{icon}).addTo(worldMap));
+    });
+    document.getElementById('sidebarTitle').textContent='✈️ F-35 Operator Nations';
+    document.getElementById('sidebarContent').innerHTML=`
+      <div style="font-size:10px;color:var(--text2);margin-bottom:8px">16 nations operate or have ordered the F-35</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;font-size:10px;margin-bottom:8px">
+        ${['USA','UK','Israel','Japan','S.Korea','Australia','Italy','Netherlands','Norway','Denmark','Belgium','Poland','Singapore','Finland','Switzerland','Canada'].map(n=>`<div style="background:var(--bg3);padding:3px 6px;border-radius:3px;color:var(--blue)">✈ ${n}</div>`).join('')}
+      </div>
+      <div style="background:var(--bg3);border-radius:5px;padding:8px;border:1px solid var(--border)">
+        <div style="font-size:14px;font-weight:700;color:var(--blue)">$428B</div>
+        <div style="font-size:9px;color:var(--text3)">Total F-35 program value</div>
+      </div>`;
+  }
+}
+
+document.getElementById('mapPrompt').addEventListener('keydown',e=>{if(e.key==='Enter')runPrompt(e.target.value);});
+
+function addPromptMarker(lat,lng,color,title,desc){
+  const icon=L.divIcon({html:`<div style="width:14px;height:14px;border-radius:50%;background:${color};box-shadow:0 0 12px ${color};border:2px solid #fff"></div>`,className:'',iconSize:[14,14]});
+  const m=L.marker([lat,lng],{icon}).addTo(worldMap);
+  m.on('click',()=>{
+    document.getElementById('sidebarTitle').textContent=title;
+    document.getElementById('sidebarContent').innerHTML=`<div style="font-size:11px;color:var(--text2);line-height:1.8">${desc}</div>`;
+  });
+  mapMarkers.push(m);
+}
+
+function showRouteSidebar(r){
+  const rc=r.risk>70?'var(--red)':r.risk>40?'var(--amber)':'var(--green)';
+  document.getElementById('sidebarTitle').textContent=r.label;
+  document.getElementById('sidebarContent').innerHTML=`
+    <div style="background:var(--bg3);border-radius:6px;padding:10px;border:1px solid var(--border);margin-bottom:8px">
+      <div style="font-size:18px;font-weight:700;color:${r.color}">${r.value}</div>
+      <div style="font-size:9px;color:var(--text3)">Total contract value</div>
+    </div>
+    <div style="margin-bottom:8px">
+      <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px">Supply Chain Risk</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="flex:1;height:5px;background:var(--bg4);border-radius:3px"><div style="width:${r.risk}%;height:5px;background:${rc};border-radius:3px"></div></div>
+        <span style="font-size:11px;font-weight:700;color:${rc}">${r.risk}/100</span>
+      </div>
+    </div>
+    <div style="margin-bottom:8px">
+      <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px">Active Programs</div>
+      <div style="display:flex;flex-wrap:wrap;gap:3px">${r.programs.map(p=>`<span style="font-size:9px;padding:2px 6px;border-radius:3px;background:${r.color}22;color:${r.color};border:1px solid ${r.color}44">${p}</span>`).join('')}</div>
+    </div>
+    <div style="margin-bottom:8px">
+      <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px">Top Contractors</div>
+      ${r.subs.map(s=>`<div style="font-size:11px;color:var(--text);padding:3px 0;border-bottom:1px solid var(--border)">${s}</div>`).join('')}
+    </div>
+    ${r.fmf>0?`<div style="background:var(--amber2);border:1px solid var(--amber)44;border-radius:5px;padding:7px;font-size:10px;margin-bottom:8px"><span style="color:var(--amber)">💰 FMF Grant:</span> <strong>$${(r.fmf/1000).toFixed(1)}B</strong></div>`:''}
+    <a href="https://www.usaspending.gov/search/?keywords=${encodeURIComponent(r.label.replace(/[→↔]/g,'').trim())}" target="_blank" class="src-link"><i class="ti ti-external-link" style="font-size:10px"></i>View on USASpending.gov</a>`;
+}
+
+function showConflictSidebar(z){
+  document.getElementById('sidebarTitle').textContent=`⚠ ${z.name}`;
+  document.getElementById('sidebarContent').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px">
+      <div style="background:var(--bg3);border-radius:5px;padding:7px;border:1px solid var(--border)"><div style="font-size:12px;font-weight:700;color:${z.color}">${z.level}</div><div style="font-size:9px;color:var(--text3)">Status</div></div>
+      <div style="background:var(--bg3);border-radius:5px;padding:7px;border:1px solid var(--border)"><div style="font-size:12px;font-weight:700;color:var(--red)">${z.casualties}</div><div style="font-size:9px;color:var(--text3)">Casualties est.</div></div>
+    </div>
+    <div style="background:var(--bg3);border-radius:5px;padding:8px;border:1px solid var(--border);margin-bottom:8px">
+      <div style="font-size:9px;color:var(--text3);margin-bottom:2px">US Aid / Involvement</div>
+      <div style="font-size:14px;font-weight:700;color:var(--green)">${z.aid}</div>
+    </div>
+    <a href="https://www.defense.gov/News/News-Stories/?search=${encodeURIComponent(z.name)}" target="_blank" class="src-link"><i class="ti ti-external-link" style="font-size:10px"></i>Pentagon News — ${z.name}</a>`;
+}
+
+function showBaseSidebar(b){
+  document.getElementById('sidebarTitle').textContent=b.name;
+  document.getElementById('sidebarContent').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px">
+      <div style="background:var(--bg3);border-radius:5px;padding:7px;border:1px solid var(--border)"><div style="font-size:14px;font-weight:700;color:var(--blue)">${b.personnel.toLocaleString()}</div><div style="font-size:9px;color:var(--text3)">Personnel</div></div>
+      <div style="background:var(--bg3);border-radius:5px;padding:7px;border:1px solid var(--border)"><div style="font-size:14px;font-weight:700;color:var(--purple)">${b.type}</div><div style="font-size:9px;color:var(--text3)">Branch</div></div>
+    </div>
+    <div style="background:var(--bg3);border-radius:5px;padding:8px;border:1px solid var(--border)">
+      <div style="font-size:9px;color:var(--text3)">Host Country</div>
+      <div style="font-size:13px;font-weight:600;color:var(--text)">${b.country}</div>
+    </div>`;
+}
+
+function showIsraelPanel(){
+  document.getElementById('sidebarTitle').textContent='🇮🇱 Israel — Defense Intelligence';
+  document.getElementById('sidebarContent').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px">
+      <div style="background:var(--bg3);border-radius:5px;padding:7px;border:1px solid var(--border)"><div style="font-size:14px;font-weight:700;color:var(--blue)">$3.8B</div><div style="font-size:9px;color:var(--text3)">FMF FY2025</div></div>
+      <div style="background:var(--bg3);border-radius:5px;padding:7px;border:1px solid var(--border)"><div style="font-size:14px;font-weight:700;color:var(--green)">$19B+</div><div style="font-size:9px;color:var(--text3)">Since Oct 2023</div></div>
+      <div style="background:var(--bg3);border-radius:5px;padding:7px;border:1px solid var(--border)"><div style="font-size:14px;font-weight:700;color:var(--amber)">50K+</div><div style="font-size:9px;color:var(--text3)">Sorties flown</div></div>
+      <div style="background:var(--bg3);border-radius:5px;padding:7px;border:1px solid var(--border)"><div style="font-size:14px;font-weight:700;color:var(--red)">72/100</div><div style="font-size:9px;color:var(--text3)">Supply Risk</div></div>
+    </div>
+    ${['Iron Dome — $1.2B FY25','F-35I Adir — 50 delivered','Arrow 3 BMD — $600M','David\'s Sling — $400M','AH-64E Apache — ongoing','MK-84 bombs — resumed'].map(p=>`<div style="font-size:11px;padding:3px 0;border-bottom:1px solid var(--border);color:var(--text)">${p}</div>`).join('')}
+    <a href="https://www.usaspending.gov/search/?keywords=Israel+defense" target="_blank" class="src-link" style="margin-top:8px"><i class="ti ti-external-link" style="font-size:10px"></i>USASpending — Israel</a>`;
+}
+
+function showUkrainePanel(){
+  document.getElementById('sidebarTitle').textContent='🇺🇦 Ukraine — Defense Intelligence';
+  document.getElementById('sidebarContent').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px">
+      <div style="background:var(--bg3);border-radius:5px;padding:7px;border:1px solid var(--border)"><div style="font-size:14px;font-weight:700;color:var(--blue)">$61B+</div><div style="font-size:9px;color:var(--text3)">US Aid total</div></div>
+      <div style="background:var(--bg3);border-radius:5px;padding:7px;border:1px solid var(--border)"><div style="font-size:14px;font-weight:700;color:var(--green)">$175B</div><div style="font-size:9px;color:var(--text3)">All allies</div></div>
+    </div>
+    ${['HIMARS — 38 systems','Patriot PAC-3 — 3 batteries','M1A1 Abrams — 31 tanks','F-16 — 20+ delivered','Stinger MANPADS — 10K+','ATACMS — classified qty'].map(p=>`<div style="font-size:11px;padding:3px 0;border-bottom:1px solid var(--border);color:var(--text)">${p}</div>`).join('')}
+    <a href="https://www.usaspending.gov/search/?keywords=Ukraine+defense" target="_blank" class="src-link" style="margin-top:8px"><i class="ti ti-external-link" style="font-size:10px"></i>USASpending — Ukraine</a>`;
+}
+
+function showTaiwanPanel(){
+  document.getElementById('sidebarTitle').textContent='🇹🇼 Taiwan — Defense Intelligence';
+  document.getElementById('sidebarContent').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px">
+      <div style="background:var(--bg3);border-radius:5px;padding:7px;border:1px solid var(--border)"><div style="font-size:14px;font-weight:700;color:var(--blue)">$19.5B</div><div style="font-size:9px;color:var(--text3)">Pending FMS</div></div>
+      <div style="background:var(--bg3);border-radius:5px;padding:7px;border:1px solid var(--border)"><div style="font-size:14px;font-weight:700;color:var(--amber)">88/100</div><div style="font-size:9px;color:var(--text3)">Tension level</div></div>
+    </div>
+    ${['F-16V upgrade — $8.1B','Harpoon coastal defense — $2.4B','M1A2T Abrams — 108 tanks','HIMARS — $436M','Patriot upgrade — $619M','MQ-9B SeaGuardian — $100M'].map(p=>`<div style="font-size:11px;padding:3px 0;border-bottom:1px solid var(--border);color:var(--text)">${p}</div>`).join('')}
+    <a href="https://www.usaspending.gov/search/?keywords=Taiwan+defense" target="_blank" class="src-link" style="margin-top:8px"><i class="ti ti-external-link" style="font-size:10px"></i>USASpending — Taiwan</a>`;
+}
+
+// ── REFRESH ──
+async function refreshAll(){
+  const btn=document.getElementById('refBtn');
+  const icon=document.getElementById('refIcon');
+  const upd=document.getElementById('lastUpd');
+  btn.disabled=true;btn.style.opacity='.5';
+  icon.style.animation='spin .6s linear infinite';
+  upd.innerHTML='<span style="color:var(--amber)">Fetching…</span>';
+  try{
+    const r=await fetch('https://api.usaspending.gov/api/v2/search/spending_by_award/',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({filters:{award_type_codes:["A","B","C","D"],agencies:[{type:"awarding",tier:"toptier",name:"Department of Defense"}],time_period:[{start_date:"2025-01-01",end_date:TODAY}]},fields:["Award ID","Recipient Name","Award Amount","Awarding Agency","Description","Action Date"],sort:"Action Date",order:"desc",limit:50,page:1})
+    });
+    const d=await r.json();const res=d.results||[];const total=d.page_metadata?.total||0;
+    if(res.length){
+      csvData=res;
+      renderLsRows(res,total,1,Math.ceil(Math.min(total,10000)/50));
+      document.getElementById('heroSub').textContent=`${total.toLocaleString()} contracts · Refreshed ${new Date().toLocaleTimeString()} · Source: USASpending.gov`;
+      document.getElementById('h-total').textContent=total.toLocaleString();
+      document.getElementById('h-vendors').textContent=new Set(res.map(x=>x['Recipient Name'])).size+'+';
+      upd.innerHTML=`<span style="color:var(--green)">✓ ${new Date().toLocaleTimeString()}</span>`;
+      toast(`✓ ${res.length} latest DoD contracts loaded`,'#22d47a');
+    }
+  }catch(e){
+    renderLsRows(fallback.map(f=>({'Recipient Name':f.vendor,'Description':f.desc,'Awarding Agency':f.agency,'Award Amount':f.amount,'Action Date':f.date,'Award ID':f.id})),fallback.length,1,1);
+    upd.innerHTML=`<span style="color:var(--amber)">Reference data</span>`;
+  }
+  btn.disabled=false;btn.style.opacity='1';icon.style.animation='';
+  fetchStocks();
+}
+
+// ── LIVE SEARCH ──
+async function liveSearch(page){
+  page=page||1;
+  const kw=document.getElementById('lsKey').value.trim();
+  const ag=document.getElementById('lsAgency').value;
+  const yr=document.getElementById('lsYear').value.split('|');
+  const sort=document.getElementById('lsSort').value;
+  document.getElementById('lsTbody').innerHTML=`<tr><td colspan="6" style="text-align:center;padding:18px"><span class="spinner"></span><span style="color:var(--text3);margin-left:8px">Querying USASpending.gov…</span></td></tr>`;
+  document.getElementById('spStatus').innerHTML=`<span class="spinner"></span> Connecting…`;
+  try{
+    const filters={award_type_codes:["A","B","C","D"],agencies:[{type:"awarding",tier:"toptier",name:ag||"Department of Defense"}],time_period:[{start_date:yr[0],end_date:yr[1]}]};
+    if(kw)filters.keywords=[kw];
+    const r=await fetch('https://api.usaspending.gov/api/v2/search/spending_by_award/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({filters,fields:["Award ID","Recipient Name","Award Amount","Awarding Agency","Description","Action Date"],sort,order:"desc",limit:50,page})});
+    const d=await r.json();const res=d.results||[];const total=d.page_metadata?.total||res.length;
+    csvData=res;const tp=Math.min(Math.ceil(total/50),200);
+    document.getElementById('spStatus').innerHTML=`<i class="ti ti-check" style="color:var(--green);font-size:11px"></i> <strong style="color:var(--amber)">${total.toLocaleString()} contracts found</strong> <span style="color:var(--text3)">· page ${page}/${tp}</span>`;
+    if(!res.length){document.getElementById('lsTbody').innerHTML=`<tr><td colspan="6" style="text-align:center;padding:18px;color:var(--text3)">No contracts found.</td></tr>`;document.getElementById('spPages').innerHTML='';return;}
+    renderLsRows(res,total,page,tp);
+  }catch(e){
+    document.getElementById('spStatus').innerHTML=`<span style="color:var(--amber)">⚠ API error — try again</span>`;
+    document.getElementById('lsTbody').innerHTML=`<tr><td colspan="6" style="text-align:center;padding:18px;color:var(--text3)">Could not reach USASpending.gov.</td></tr>`;
+  }
+}
+
+function renderLsRows(res,total,page,tp){
+  document.getElementById('lsTbody').innerHTML=res.map(c=>{
+    const v=c['Recipient Name']||c.vendor||'';
+    const desc=c['Description']||c.desc||'';
+    const ag=c['Awarding Agency']||c.agency||'';
+    const amt=c['Award Amount']||c.amount||0;
+    const dt=c['Action Date']||c.date||'';
+    const id=c['Award ID']||c.id||'';
+    const url=id?`https://www.usaspending.gov/award/${encodeURIComponent(id)}/`:`https://www.usaspending.gov/search/?keywords=${encodeURIComponent(v)}`;
+    return`<tr class="clickable" onclick="window.open('${url}','_blank')">
+      <td><span class="co-dot" style="background:${aCol(ag)}"></span><strong style="font-size:11px">${v.slice(0,26)}</strong></td>
+      <td style="color:var(--text2);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px">${desc.slice(0,50)}</td>
+      <td><span class="tag" style="color:${aCol(ag)}">${aShort(ag)}</span></td>
+      <td class="amt">${fmt(amt)}</td>
+      <td style="color:var(--text3);font-size:11px">${dt?dt.slice(0,10):''}</td>
+      <td><span class="pill p-green">Awarded</span></td>
+    </tr>`;
+  }).join('');
+  const pg=[];
+  if(page>1)pg.push(`<button class="pg" onclick="liveSearch(${page-1})">‹</button>`);
+  for(let i=Math.max(1,page-2);i<=Math.min(tp,page+2);i++)pg.push(`<button class="pg${i===page?' active':''}" onclick="liveSearch(${i})">${i}</button>`);
+  if(page<tp)pg.push(`<button class="pg" onclick="liveSearch(${page+1})">›</button>`);
+  document.getElementById('spPages').innerHTML=pg.join('');
+}
+document.getElementById('lsKey').addEventListener('keydown',e=>{if(e.key==='Enter')liveSearch(1);});
+
+// ── CONTRACTS TABLE ──
+function renderContractTable(){
+  const f=cFilter==='all'?fallback:fallback.filter(c=>c.agency.includes(cFilter));
+  document.getElementById('cTbody').innerHTML=f.map(c=>`<tr class="clickable" onclick="window.open('https://www.usaspending.gov/award/${encodeURIComponent(c.id)}/','_blank')">
+    <td><span class="co-dot" style="background:${aCol(c.agency)}"></span><strong style="font-size:11px">${c.vendor.slice(0,24)}</strong></td>
+    <td style="color:var(--text2);font-size:11px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.desc}</td>
+    <td><span class="tag" style="color:${aCol(c.agency)}">${aShort(c.agency)}</span></td>
+    <td class="amt">${fmt(c.amount)}</td>
+    <td style="color:var(--text3);font-size:11px">${c.date}</td>
+  </tr>`).join('');
+  document.getElementById('topTbody').innerHTML=[...fallback].sort((a,b)=>b.amount-a.amount).map((c,i)=>`<tr class="clickable" onclick="window.open('https://www.usaspending.gov/award/${encodeURIComponent(c.id)}/','_blank')">
+    <td style="color:var(--text3);font-weight:700">#${i+1}</td>
+    <td><strong style="font-size:11px">${c.vendor.slice(0,22)}</strong></td>
+    <td style="color:var(--text2);font-size:11px">${c.desc.slice(0,44)}…</td>
+    <td class="amt">${fmt(c.amount)}</td>
+    <td><span class="tag" style="color:${aCol(c.agency)}">${aShort(c.agency)}</span></td>
+  </tr>`).join('');
+}
+function filterC(f){cFilter=f;renderContractTable();}
+
+// ── RFPs ──
+function renderRFPs(){
+  document.getElementById('rfpTbody').innerHTML=rfps.map(r=>`<tr class="clickable" onclick="window.open('${r.url}','_blank')">
+    <td><strong>${r.title}</strong></td>
+    <td><span class="tag">${r.agency}</span></td>
+    <td class="amt">${r.val}</td>
+    <td style="color:var(--text3)">${r.deadline}</td>
+    <td><span class="pill ${r.stage==='open'?'p-amber':'p-blue'}">${r.stage==='open'?'Open':'Evaluation'}</span></td>
+  </tr>`).join('');
+}
+
+// ── COMPANIES ──
+function renderCompanies(){
+  document.getElementById('compTbody').innerHTML=companies.map(c=>`<tr class="clickable" onclick="openModal('${c.name}')">
+    <td><span class="co-dot" style="background:${c.color}"></span><strong>${c.name}</strong></td>
+    <td style="color:var(--text3)">${c.ticker}</td>
+    <td class="amt">${c.fy24}</td>
+    <td style="color:var(--text2)">${c.contracts.toLocaleString()}</td>
+    <td style="color:${c.trend.startsWith('+')?'var(--green)':'var(--red)'}">${c.trend}</td>
+    <td><span class="tag">${c.sector}</span></td>
+    <td><button class="tag" style="cursor:pointer;color:var(--blue);border:none;background:var(--bg4)" onclick="event.stopPropagation();document.getElementById('cmpA').value='${c.name}';showView('compare',document.querySelectorAll('.nl')[5])">Compare</button></td>
+  </tr>`).join('');
+}
+
+// ── COMPARE ──
+function populateSelects(){
+  const opts=companies.map(c=>`<option value="${c.name}">${c.name}</option>`).join('');
+  document.getElementById('cmpA').innerHTML=opts;document.getElementById('cmpB').innerHTML=opts;
+  document.getElementById('cmpA').value='Lockheed Martin';document.getElementById('cmpB').value='Northrop Grumman';
+}
+function runCompare(){
+  const a=companies.find(c=>c.name===document.getElementById('cmpA').value);
+  const b=companies.find(c=>c.name===document.getElementById('cmpB').value);
+  if(!a||!b)return;
+  const sa=stockPrices[a.ticker];const sb=stockPrices[b.ticker];
+  const metrics=[
+    {label:"FY24",av:a.raw,bv:b.raw,fmt:v=>'$'+v.toFixed(1)+'B'},
+    {label:"Contracts",av:a.contracts,bv:b.contracts,fmt:v=>v.toLocaleString()},
+    {label:"YoY",av:parseFloat(a.trend),bv:parseFloat(b.trend),fmt:v=>(v>0?'+':'')+v+'%'},
+    {label:"Stock",av:sa?sa.price:0,bv:sb?sb.price:0,fmt:v=>v>0?'$'+v.toFixed(2):'—'},
+  ];
+  document.getElementById('cmpResult').innerHTML=`
+    <div class="cmp-grid">
+      ${[a,b].map(c=>{const s=stockPrices[c.ticker];return`<div class="cmp-card">
+        <div style="padding:10px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px">
+          <div style="width:26px;height:26px;border-radius:5px;background:${c.color}22;color:${c.color};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800">${c.ticker.slice(0,2)}</div>
+          <div><div style="font-size:12px;font-weight:700;color:${c.color}">${c.name}</div><div style="font-size:9px;color:var(--text3)">${c.ticker}</div></div>
+        </div>
+        <div class="cmp-stats">
+          <div class="cs"><div class="cv">${c.fy24}</div><div class="cl">FY24</div></div>
+          <div class="cs"><div class="cv">${c.contracts.toLocaleString()}</div><div class="cl">Contracts</div></div>
+          <div class="cs"><div class="cv" style="color:${parseFloat(c.trend)>0?'var(--green)':'var(--red)'}">${c.trend}</div><div class="cl">YoY</div></div>
+          <div class="cs"><div class="cv" style="color:${c.color}">${s?'$'+s.price.toFixed(2):'—'}</div><div class="cl">Stock</div></div>
+        </div>
+        <div style="padding:8px 10px"><div style="position:relative;height:68px"><canvas id="cc-${c.ticker}"></canvas></div></div>
+        <div style="padding:0 10px 8px;display:flex;flex-wrap:wrap;gap:3px">${c.programs.map(p=>`<span class="tag">${p}</span>`).join('')}</div>
+      </div>`;}).join('')}
+    </div>
+    <div style="padding:8px 0">
+      <div class="tbl-title" style="margin-bottom:8px">Head-to-head</div>
+      ${metrics.map(m=>{const tot=Math.abs(m.av)+Math.abs(m.bv)||1;const ap=Math.round((Math.abs(m.av)/tot)*100);return`<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px"><span style="font-size:10px;color:${a.color};min-width:60px;text-align:right">${m.fmt(m.av)}</span><div style="flex:1;height:4px;background:var(--bg5);border-radius:3px;overflow:hidden;display:flex"><div style="width:${ap}%;background:${a.color}"></div><div style="width:${100-ap}%;background:${b.color}"></div></div><span style="font-size:10px;color:${b.color};min-width:60px">${m.fmt(m.bv)}</span><span style="font-size:9px;color:var(--text3);min-width:50px">${m.label}</span></div>`;}).join('')}
+    </div>`;
+  setTimeout(()=>{[[a,'cc-'+a.ticker],[b,'cc-'+b.ticker]].forEach(([co,id])=>{const el=document.getElementById(id);if(!el)return;new Chart(el,{type:'bar',data:{labels:['FY22','FY23','FY24'],datasets:[{data:co.fy,backgroundColor:co.color+'66',borderColor:co.color,borderWidth:1.5,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'#ffffff06'},ticks:{color:'#454e68',font:{size:9}}},y:{grid:{color:'#ffffff06'},ticks:{color:'#454e68',font:{size:9},callback:v=>'$'+v+'B'}}}}});});},50);
+}
+
+// ── RIVALRIES ──
+function renderRivalries(){
+  document.getElementById('rvTbody').innerHTML=rivalries.map(r=>`<tr>
+    <td><strong>${r.prog}</strong></td>
+    <td><span style="color:var(--blue)">${r.a}</span><span style="color:var(--text3)"> vs </span><span style="color:var(--orange)">${r.b}</span></td>
+    <td class="amt">${r.val}</td>
+    <td><span class="tag">${r.cat}</span></td>
+    <td><span class="pill p-blue">${r.stage}</span></td>
+  </tr>`).join('');
+}
+
+// ── SIDEBAR ──
+function renderSidebar(){
+  document.getElementById('sbComp').innerHTML=companies.slice(0,6).map(c=>`<div class="co-row" onclick="openModal('${c.name}')">
+    <div class="co-logo" style="background:${c.color}22;color:${c.color}">${c.ticker.slice(0,2)}</div>
+    <div style="font-size:11px;flex:1;font-weight:500">${c.name.split(' ')[0]}</div>
+    <div style="width:44px;height:3px;background:var(--bg5);border-radius:2px"><div style="width:${c.pct}%;height:3px;border-radius:2px;background:${c.color}"></div></div>
+    <div style="font-size:10px;font-weight:600;min-width:38px;text-align:right;color:${c.color}">${c.fy24}</div>
+  </div>`).join('');
+  document.getElementById('sbRiv').innerHTML=rivalries.slice(0,4).map(r=>`<div class="rv-row">
+    <span style="font-size:9px;padding:1px 5px;border-radius:3px;background:var(--purple2);color:var(--purple);float:right">${r.stage}</span>
+    <div style="font-size:11px;font-weight:500;color:var(--text);margin-bottom:2px">${r.prog}</div>
+    <div style="font-size:10px;color:var(--text2)">${r.a} <span style="color:var(--text3)">vs</span> ${r.b}</div>
+  </div>`).join('');
+  document.getElementById('sbAlerts').innerHTML=alerts.map(a=>`<div class="al-row">
+    <div class="al-dot" style="background:${a.color}"></div>
+    <div><div style="font-size:11px;color:var(--text)">${a.text}</div><div style="font-size:9px;color:var(--text3)">${a.time}</div></div>
+  </div>`).join('');
+}
+
+// ── MODAL ──
+function openModal(name){
+  const c=companies.find(x=>x.name===name);if(!c)return;
+  const s=stockPrices[c.ticker];
+  document.getElementById('modal').innerHTML=`
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:11px">
+      <div style="display:flex;align-items:center;gap:11px">
+        <div style="width:38px;height:38px;border-radius:7px;background:${c.color}22;color:${c.color};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800">${c.ticker.slice(0,2)}</div>
+        <div><div style="font-size:16px;font-weight:700">${c.name}</div><div style="font-size:11px;color:var(--text2)">${c.ticker} · ${c.sector}</div></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:11px;line-height:1.7">${c.desc}</p>
+    <div class="mstat-grid">
+      <div class="mstat"><div class="mv" style="color:${c.color}">${c.fy24}</div><div class="ml">FY24 Obligated</div></div>
+      <div class="mstat"><div class="mv">${c.contracts.toLocaleString()}</div><div class="ml">Contracts</div></div>
+      <div class="mstat"><div class="mv" style="color:${parseFloat(c.trend)>0?'var(--green)':'var(--red)'}">${c.trend}</div><div class="ml">YoY Growth</div></div>
+      <div class="mstat"><div class="mv" style="color:${c.color}">${s?'$'+s.price.toFixed(2):'Loading…'}</div><div class="ml">Live Stock</div></div>
+      <div class="mstat"><div class="mv">${s?'$'+s.high.toFixed(2)+' / $'+s.low.toFixed(2):'—'}</div><div class="ml">High / Low</div></div>
+      <div class="mstat"><div class="mv" style="color:${s&&s.chg>=0?'var(--green)':'var(--red)'}">${s?(s.chg>=0?'▲ +':'▼ ')+s.pct.toFixed(2)+'%':'—'}</div><div class="ml">Day Change</div></div>
+    </div>
+    <div class="modal-sec">Historical Obligations (FY22–24)</div>
+    <div style="position:relative;height:100px"><canvas id="mChart"></canvas></div>
+    <div class="modal-sec">Key Programs</div>
+    <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px">${c.programs.map(p=>`<span class="tag" style="font-size:11px;padding:3px 8px">${p}</span>`).join('')}</div>
+    <div style="display:flex;gap:8px">
+      <a href="https://www.usaspending.gov/search/?keywords=${encodeURIComponent(c.name)}" target="_blank" class="src-link" style="flex:1"><i class="ti ti-external-link" style="font-size:10px"></i>View on USASpending.gov</a>
+      <button style="background:#14532d;color:#22d47a;border:1px solid #22d47a33;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:11px;display:flex;align-items:center;gap:4px" onclick="exportCompanyExcel('${c.name}')"><i class="ti ti-file-spreadsheet" style="font-size:10px"></i>Excel</button>
+      <button style="background:var(--blue2);color:var(--blue);border:1px solid var(--blue3);border-radius:6px;padding:5px 10px;cursor:pointer;font-size:11px" onclick="closeModal();document.getElementById('cmpA').value='${c.name}';showView('compare',document.querySelectorAll('.nl')[5])">Compare</button>
+    </div>`;
+  document.getElementById('overlay').classList.add('show');
+  setTimeout(()=>{const el=document.getElementById('mChart');if(!el)return;new Chart(el,{type:'bar',data:{labels:['FY2022','FY2023','FY2024'],datasets:[{data:c.fy,backgroundColor:c.color+'77',borderColor:c.color,borderWidth:1.5,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'#ffffff06'},ticks:{color:'#454e68',font:{size:10}}},y:{grid:{color:'#ffffff08'},ticks:{color:'#454e68',font:{size:10},callback:v=>'$'+v+'B'}}}}});},50);
+}
+function closeModal(){document.getElementById('overlay').classList.remove('show');}
+
+// ── EXCEL EXPORT ──
+function exportExcel(){
+  const data=csvData.length?csvData.map(c=>({'Vendor':c['Recipient Name']||'','Description':c['Description']||'','Agency':c['Awarding Agency']||'','Amount ($)':c['Award Amount']||0,'Date':c['Action Date']||'','Award ID':c['Award ID']||''})):fallback.map(c=>({'Vendor':c.vendor,'Description':c.desc,'Agency':c.agency,'Amount ($)':c.amount,'Date':c.date,'Award ID':c.id}));
+  const xml=buildExcelXML([
+    {name:'DoD Contracts',headers:['Vendor','Description','Agency','Amount ($)','Date','Award ID'],rows:data.map(r=>Object.values(r))},
+    {name:'Top Contractors',headers:['Company','Ticker','FY24','Contracts','YoY','Sector','Stock'],rows:companies.map(c=>{const s=stockPrices[c.ticker];return[c.name,c.ticker,c.fy24,c.contracts,c.trend,c.sector,s?'$'+s.price.toFixed(2):'—'];})},
+    {name:'Open RFPs',headers:['Title','Agency','Est. Value','Deadline','Stage'],rows:rfps.map(r=>[r.title,r.agency,r.val,r.deadline,r.stage])},
+    {name:'Supply Routes',headers:['Route','Value','Risk Score','Programs','Contractors'],rows:tradeRoutes.map(r=>[r.label,r.value,r.risk+'/100',r.programs.join(', '),r.subs.join(', ')])},
+  ]);
+  const a=document.createElement('a');a.href='data:application/vnd.ms-excel;charset=utf-8,'+encodeURIComponent(xml);a.download=`DefSpend_${TODAY}.xls`;a.click();
+  toast('✓ Excel exported — 4 sheets','#22d47a');
+}
+
+function exportCompanyExcel(name){
+  const c=companies.find(x=>x.name===name);if(!c)return;
+  const s=stockPrices[c.ticker];
+  const xml=buildExcelXML([{name:c.name.slice(0,31),headers:['Metric','Value'],rows:[['Company',c.name],['Ticker',c.ticker],['Sector',c.sector],['FY2022 ($B)',c.fy[0]],['FY2023 ($B)',c.fy[1]],['FY2024 ($B)',c.fy[2]],['Contracts',c.contracts],['YoY',c.trend],['Live Stock',s?'$'+s.price.toFixed(2):'N/A'],['Day Change',s?(s.chg>=0?'+':'')+s.pct.toFixed(2)+'%':'N/A'],['Programs',c.programs.join(', ')],['Description',c.desc]]}]);
+  const a=document.createElement('a');a.href='data:application/vnd.ms-excel;charset=utf-8,'+encodeURIComponent(xml);a.download=`DefSpend_${c.ticker}_${TODAY}.xls`;a.click();
+  toast(`✓ ${c.name} exported`,'#22d47a');
+}
+
+function buildExcelXML(sheets){
+  const styles=`<Styles><Style ss:ID="h"><Font ss:Bold="1" ss:Color="#4F8EF7"/><Interior ss:Color="#0F2A5C" ss:Pattern="Solid"/></Style><Style ss:ID="e"><Interior ss:Color="#121520" ss:Pattern="Solid"/><Font ss:Color="#DDE2F0"/></Style><Style ss:ID="o"><Interior ss:Color="#0D1017" ss:Pattern="Solid"/><Font ss:Color="#DDE2F0"/></Style></Styles>`;
+  const wsXml=sheets.map(s=>`<Worksheet ss:Name="${s.name}"><Table><Row>${s.headers.map(h=>`<Cell ss:StyleID="h"><Data ss:Type="String">${h}</Data></Cell>`).join('')}</Row>${s.rows.map((r,i)=>`<Row>${r.map(v=>`<Cell ss:StyleID="${i%2===0?'e':'o'}"><Data ss:Type="${typeof v==='number'?'Number':'String'}">${String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</Data></Cell>`).join('')}</Row>`).join('')}</Table></Worksheet>`).join('');
+  return`<?xml version="1.0"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">${styles}${wsXml}</Workbook>`;
+}
+
+// ── SEARCH BAR ──
+function runSearch(){
+  const q=document.getElementById('aiQ').value.trim();if(!q)return;
+  const el=document.getElementById('aiRes');
+  const enc=encodeURIComponent(q+' defense contract DoD');
+  el.innerHTML=`
+    <div style="margin-bottom:8px;font-size:11px;color:var(--blue)"><i class="ti ti-search" style="font-size:11px"></i> <strong>Results for:</strong> <span style="color:var(--text)">"${q}"</span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+      <a href="https://www.usaspending.gov/search/?keywords=${encodeURIComponent(q)}" target="_blank" style="display:flex;align-items:center;gap:8px;background:var(--bg4);border:1px solid var(--border2);border-radius:6px;padding:8px 10px;text-decoration:none">
+        <i class="ti ti-database" style="color:var(--blue);font-size:14px"></i>
+        <div><div style="font-size:11px;font-weight:600;color:var(--text)">USASpending.gov</div><div style="font-size:10px;color:var(--text3)">Official contract database</div></div>
+      </a>
+      <a href="https://sam.gov/search/?keywords=${encodeURIComponent(q)}&index=opp" target="_blank" style="display:flex;align-items:center;gap:8px;background:var(--bg4);border:1px solid var(--border2);border-radius:6px;padding:8px 10px;text-decoration:none">
+        <i class="ti ti-radar" style="color:var(--amber);font-size:14px"></i>
+        <div><div style="font-size:11px;font-weight:600;color:var(--text)">SAM.gov</div><div style="font-size:10px;color:var(--text3)">Active RFPs & solicitations</div></div>
+      </a>
+      <a href="https://www.defense.gov/Search/#q=${encodeURIComponent(q)}" target="_blank" style="display:flex;align-items:center;gap:8px;background:var(--bg4);border:1px solid var(--border2);border-radius:6px;padding:8px 10px;text-decoration:none">
+        <i class="ti ti-building-fortress" style="color:var(--green);font-size:14px"></i>
+        <div><div style="font-size:11px;font-weight:600;color:var(--text)">Defense.gov</div><div style="font-size:10px;color:var(--text3)">Pentagon news & contracts</div></div>
+      </a>
+      <a href="https://www.google.com/search?q=${enc}" target="_blank" style="display:flex;align-items:center;gap:8px;background:var(--bg4);border:1px solid var(--border2);border-radius:6px;padding:8px 10px;text-decoration:none">
+        <i class="ti ti-world-search" style="color:var(--purple);font-size:14px"></i>
+        <div><div style="font-size:11px;font-weight:600;color:var(--text)">Web Search</div><div style="font-size:10px;color:var(--text3)">News, reports & analysis</div></div>
+      </a>
+    </div>`;
+  el.classList.add('show');
+}
+document.getElementById('aiQ').addEventListener('keydown',e=>{if(e.key==='Enter')runSearch();});
+
+// ── NAVIGATION ──
+const views=['search','contracts','rfp','map','companies','compare','stocks','rivalries'];
+function showView(v,btn){
+  document.querySelectorAll('.nl').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  views.forEach(x=>{const el=document.getElementById('view-'+x);if(el)el.style.display='none';});
+  document.getElementById('view-'+v).style.display='block';
+  if(v==='rfp')renderRFPs();
+  if(v==='map')setTimeout(initWorldMap,100);
+  if(v==='companies')renderCompanies();
+  if(v==='rivalries')renderRivalries();
+  if(v==='stocks')renderStockGrid();
+  if(v==='compare'){populateSelects();runCompare();}
+}
+function switchSub(btn,id){
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+  ['sub-recent','sub-top'].forEach(s=>{const el=document.getElementById(s);if(el)el.style.display='none';});
+  document.getElementById(id).style.display='block';
+}
+
+// ── SECTOR CHART ──
+new Chart(document.getElementById('sectorChart'),{type:'doughnut',data:{labels:['Aviation','Land','Naval','C4ISR','Missiles'],datasets:[{data:[28,22,19,16,15],backgroundColor:['#fb923c','#4ade80','#60a5fa','#a78bfa','#f472b6'],borderWidth:0,hoverOffset:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},cutout:'70%'}});
+
+// ── INIT ──
+renderSidebar();
+renderContractTable();
+renderTicker();
+fetchStocks();
+setInterval(fetchStocks,60000);
+setInterval(refreshAll,5*60*1000);
+setTimeout(refreshAll,800);
+</script>
+</body>
+</html>
