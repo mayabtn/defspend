@@ -481,18 +481,18 @@ const alerts=[
 ];
 
 const fallback=[
-  {vendor:"Lockheed Martin Corp",desc:"F-35 Lightning II Lot 18-19 LRIP",agency:"DEPT OF THE AIR FORCE",amount:15960000000,date:"2025-05-12",id:"CONT_AWD_F3300120C0001"},
-  {vendor:"Huntington Ingalls Industries",desc:"CVN-82 Ford-class carrier construction",agency:"DEPT OF THE NAVY",amount:12200000000,date:"2025-04-05",id:"CONT_AWD_N0002420C6000"},
-  {vendor:"General Dynamics Land Systems",desc:"M1A2 SEPv3 Abrams upgrade 450 units",agency:"DEPT OF THE ARMY",amount:4370000000,date:"2025-05-08",id:"CONT_AWD_W56HZV20C0001"},
-  {vendor:"Raytheon Company",desc:"Patriot PAC-3 MSE missile system",agency:"DEPT OF THE ARMY",amount:3220000000,date:"2025-05-05",id:"CONT_AWD_W31P4Q20C0001"},
-  {vendor:"Northrop Grumman Systems",desc:"B-21 Raider stealth bomber lot 1",agency:"DEPT OF THE AIR FORCE",amount:2800000000,date:"2025-04-30",id:"CONT_AWD_FA861520C0001"},
-  {vendor:"General Dynamics Bath Iron Works",desc:"DDG-51 Flight III destroyer",agency:"DEPT OF THE NAVY",amount:2350000000,date:"2025-04-15",id:"CONT_AWD_N0002421C6000"},
-  {vendor:"General Dynamics Mission Systems",desc:"Virginia-class submarine comms",agency:"DEPT OF THE NAVY",amount:1820000000,date:"2025-03-28",id:"CONT_AWD_N0002421C6001"},
-  {vendor:"Boeing Defense",desc:"MH-139A Grey Wolf helicopter",agency:"DEPT OF THE AIR FORCE",amount:1140000000,date:"2025-04-28",id:"CONT_AWD_FA700120C0001"},
-  {vendor:"L3Harris Technologies",desc:"AN/PRC-163 tactical radio systems",agency:"DEPT OF THE ARMY",amount:890000000,date:"2025-04-22",id:"CONT_AWD_W15P7T20C0001"},
-  {vendor:"BAE Systems",desc:"Bradley M2A4 IFV electronic upgrade",agency:"DEPT OF THE ARMY",amount:742000000,date:"2025-04-18",id:"CONT_AWD_W56HZV20C0002"},
-  {vendor:"Palantir Technologies",desc:"Maven Smart System AI platform",agency:"DEPT OF THE AIR FORCE",amount:619000000,date:"2025-04-10",id:"CONT_AWD_FA875021C0001"},
-  {vendor:"Leidos Inc",desc:"DISA ENCORE III IT services",agency:"DEPT OF THE AIR FORCE",amount:580000000,date:"2025-04-02",id:"CONT_AWD_HC102821C0001"},
+  {vendor:"Lockheed Martin Corp",desc:"F-35 Lightning II Lot 18-19 LRIP",agency:"DEPT OF THE AIR FORCE",amount:15960000000,date:"2025-05-12",url:"https://www.usaspending.gov/search/?keywords=Lockheed+Martin+F-35&filters=%7B%22agencies%22%3A%5B%7B%22type%22%3A%22awarding%22%2C%22tier%22%3A%22toptier%22%2C%22name%22%3A%22Department+of+Defense%22%7D%5D%7D"},
+  {vendor:"Huntington Ingalls Industries",desc:"CVN-82 Ford-class carrier construction",agency:"DEPT OF THE NAVY",amount:12200000000,date:"2025-04-05",url:"https://www.usaspending.gov/search/?keywords=Huntington+Ingalls+carrier"},
+  {vendor:"General Dynamics Land Systems",desc:"M1A2 SEPv3 Abrams upgrade 450 units",agency:"DEPT OF THE ARMY",amount:4370000000,date:"2025-05-08",url:"https://www.usaspending.gov/search/?keywords=General+Dynamics+Abrams"},
+  {vendor:"Raytheon Company",desc:"Patriot PAC-3 MSE missile system",agency:"DEPT OF THE ARMY",amount:3220000000,date:"2025-05-05",url:"https://www.usaspending.gov/search/?keywords=Raytheon+Patriot+PAC-3"},
+  {vendor:"Northrop Grumman Systems",desc:"B-21 Raider stealth bomber lot 1",agency:"DEPT OF THE AIR FORCE",amount:2800000000,date:"2025-04-30",url:"https://www.usaspending.gov/search/?keywords=Northrop+Grumman+B-21+Raider"},
+  {vendor:"General Dynamics Bath Iron Works",desc:"DDG-51 Flight III destroyer",agency:"DEPT OF THE NAVY",amount:2350000000,date:"2025-04-15",url:"https://www.usaspending.gov/search/?keywords=General+Dynamics+Bath+Iron+DDG-51"},
+  {vendor:"General Dynamics Mission Systems",desc:"Virginia-class submarine comms",agency:"DEPT OF THE NAVY",amount:1820000000,date:"2025-03-28",url:"https://www.usaspending.gov/search/?keywords=General+Dynamics+Virginia+submarine"},
+  {vendor:"Boeing Defense",desc:"MH-139A Grey Wolf helicopter",agency:"DEPT OF THE AIR FORCE",amount:1140000000,date:"2025-04-28",url:"https://www.usaspending.gov/search/?keywords=Boeing+MH-139+Grey+Wolf"},
+  {vendor:"L3Harris Technologies",desc:"AN/PRC-163 tactical radio systems",agency:"DEPT OF THE ARMY",amount:890000000,date:"2025-04-22",url:"https://www.usaspending.gov/search/?keywords=L3Harris+PRC-163+radio"},
+  {vendor:"BAE Systems",desc:"Bradley M2A4 IFV electronic upgrade",agency:"DEPT OF THE ARMY",amount:742000000,date:"2025-04-18",url:"https://www.usaspending.gov/search/?keywords=BAE+Systems+Bradley+M2A4"},
+  {vendor:"Palantir Technologies",desc:"Maven Smart System AI platform",agency:"DEPT OF THE AIR FORCE",amount:619000000,date:"2025-04-10",url:"https://www.usaspending.gov/search/?keywords=Palantir+Maven+Smart+System"},
+  {vendor:"Leidos Inc",desc:"DISA ENCORE III IT services",agency:"DEPT OF THE AIR FORCE",amount:580000000,date:"2025-04-02",url:"https://www.usaspending.gov/search/?keywords=Leidos+DISA+ENCORE"},
 ];
 
 const tradeRoutes=[
@@ -952,14 +952,14 @@ document.getElementById('lsKey').addEventListener('keydown',e=>{if(e.key==='Ente
 // ── CONTRACTS TABLE ──
 function renderContractTable(){
   const f=cFilter==='all'?fallback:fallback.filter(c=>c.agency.includes(cFilter));
-  document.getElementById('cTbody').innerHTML=f.map(c=>`<tr class="clickable" onclick="window.open('https://www.usaspending.gov/award/${encodeURIComponent(c.id)}/','_blank')">
+  document.getElementById('cTbody').innerHTML=f.map(c=>`<tr class="clickable" onclick="window.open('${c.url}','_blank')">
     <td><span class="co-dot" style="background:${aCol(c.agency)}"></span><strong style="font-size:11px">${c.vendor.slice(0,24)}</strong></td>
     <td style="color:var(--text2);font-size:11px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.desc}</td>
     <td><span class="tag" style="color:${aCol(c.agency)}">${aShort(c.agency)}</span></td>
     <td class="amt">${fmt(c.amount)}</td>
     <td style="color:var(--text3);font-size:11px">${c.date}</td>
   </tr>`).join('');
-  document.getElementById('topTbody').innerHTML=[...fallback].sort((a,b)=>b.amount-a.amount).map((c,i)=>`<tr class="clickable" onclick="window.open('https://www.usaspending.gov/award/${encodeURIComponent(c.id)}/','_blank')">
+  document.getElementById('topTbody').innerHTML=[...fallback].sort((a,b)=>b.amount-a.amount).map((c,i)=>`<tr class="clickable" onclick="window.open('${c.url}','_blank')">
     <td style="color:var(--text3);font-weight:700">#${i+1}</td>
     <td><strong style="font-size:11px">${c.vendor.slice(0,22)}</strong></td>
     <td style="color:var(--text2);font-size:11px">${c.desc.slice(0,44)}…</td>
@@ -1089,10 +1089,15 @@ function openModal(name){
     <div style="position:relative;height:100px"><canvas id="mChart"></canvas></div>
     <div class="modal-sec">Key Programs</div>
     <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px">${c.programs.map(p=>`<span class="tag" style="font-size:11px;padding:3px 8px">${p}</span>`).join('')}</div>
+    <div id="aiModalResult-${c.ticker}" style="display:none;margin:10px 0;background:var(--bg3);border-left:2px solid var(--blue);border-radius:6px;padding:10px 14px;font-size:12px;line-height:1.8;color:var(--text2)"></div>
+    <div style="display:flex;gap:8px;margin-bottom:8px">
+      <button style="flex:1;background:var(--blue2);color:var(--blue);border:1px solid var(--blue3);border-radius:6px;padding:7px 10px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;gap:4px" onclick="askAIAboutCompany('${c.name}','${c.ticker}')"><i class="ti ti-sparkles" style="font-size:11px"></i>AI Analysis</button>
+      <button style="flex:1;background:var(--blue2);color:var(--blue);border:1px solid var(--blue3);border-radius:6px;padding:7px 10px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;gap:4px" onclick="askAIAboutCompany('${c.name} latest contracts and news 2025','${c.ticker}','news')"><i class="ti ti-news" style="font-size:11px"></i>Latest News</button>
+    </div>
     <div style="display:flex;gap:8px">
-      <a href="https://www.usaspending.gov/search/?keywords=${encodeURIComponent(c.name)}" target="_blank" class="src-link" style="flex:1"><i class="ti ti-external-link" style="font-size:10px"></i>View on USASpending.gov</a>
+      <a href="https://www.usaspending.gov/search/?keywords=${encodeURIComponent(c.name)}&filters=%7B%22agencies%22%3A%5B%7B%22type%22%3A%22awarding%22%2C%22tier%22%3A%22toptier%22%2C%22name%22%3A%22Department+of+Defense%22%7D%5D%7D" target="_blank" class="src-link" style="flex:1"><i class="ti ti-external-link" style="font-size:10px"></i>USASpending.gov</a>
+      <a href="https://www.defense.gov/Search/#q=${encodeURIComponent(c.name)}" target="_blank" class="src-link" style="flex:1"><i class="ti ti-external-link" style="font-size:10px"></i>Defense.gov</a>
       <button style="background:#14532d;color:#22d47a;border:1px solid #22d47a33;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:11px;display:flex;align-items:center;gap:4px" onclick="exportCompanyExcel('${c.name}')"><i class="ti ti-file-spreadsheet" style="font-size:10px"></i>Excel</button>
-      <button style="background:var(--blue2);color:var(--blue);border:1px solid var(--blue3);border-radius:6px;padding:5px 10px;cursor:pointer;font-size:11px" onclick="closeModal();document.getElementById('cmpA').value='${c.name}';showView('compare',document.querySelectorAll('.nl')[5])">Compare</button>
     </div>`;
   document.getElementById('overlay').classList.add('show');
   setTimeout(()=>{const el=document.getElementById('mChart');if(!el)return;new Chart(el,{type:'bar',data:{labels:['FY2022','FY2023','FY2024'],datasets:[{data:c.fy,backgroundColor:c.color+'77',borderColor:c.color,borderWidth:1.5,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'#ffffff06'},ticks:{color:'#454e68',font:{size:10}}},y:{grid:{color:'#ffffff08'},ticks:{color:'#454e68',font:{size:10},callback:v=>'$'+v+'B'}}}}});},50);
@@ -1180,6 +1185,31 @@ async function runSearch(){
   }
   ld.classList.remove('show');
 }
+async function askAIAboutCompany(question,ticker,type){
+  const el=document.getElementById('aiModalResult-'+ticker);
+  if(!el)return;
+  el.style.display='block';
+  el.innerHTML='<span class="spinner"></span> Analyzing…';
+  try{
+    const r=await fetch('/api/ai',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({question:`As a defense contract intelligence analyst, provide a concise analysis about ${question}. Focus on DoD contracts, financial performance, key programs, and competitive position. 4-5 sentences.`})
+    });
+    const d=await r.json();
+    if(d.answer){
+      const formatted=d.answer
+        .replace(/\*\*(.+?)\*\*/g,'<strong style="color:var(--text)">$1</strong>')
+        .replace(/\*(.+?)\*/g,'<em>$1</em>')
+        .replace(/\n\n/g,'<br><br>')
+        .replace(/\n/g,'<br>');
+      el.innerHTML=`<span style="font-size:10px;color:var(--blue);display:flex;align-items:center;gap:4px;margin-bottom:6px"><i class="ti ti-sparkles" style="font-size:10px"></i> AI Analysis</span>${formatted}`;
+    }
+  }catch(e){
+    el.innerHTML='<span style="color:var(--amber)">Analysis unavailable</span>';
+  }
+}
+
 // ── NAVIGATION ──
 const views=['search','contracts','rfp','map','companies','compare','stocks','rivalries'];
 function showView(v,btn){
