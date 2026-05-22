@@ -1141,7 +1141,14 @@ async function runSearch(){
     });
     const d=await r.json();
     if(d.answer){
-      el.innerHTML=`<span style="font-size:10px;color:var(--blue);margin-right:6px"><i class="ti ti-sparkles" style="font-size:10px"></i> AI Defense Analysis</span>${d.answer}`;
+      const formatted=d.answer
+        .replace(/\*\*(.+?)\*\*/g,'<strong style="color:var(--text)">$1</strong>')
+        .replace(/\*(.+?)\*/g,'<em>$1</em>')
+        .replace(/^## (.+)$/gm,'<div style="font-size:12px;font-weight:700;color:var(--blue);margin:8px 0 4px">$1</div>')
+        .replace(/^### (.+)$/gm,'<div style="font-size:11px;font-weight:600;color:var(--text);margin:6px 0 3px">$1</div>')
+        .replace(/\n\n/g,'<br><br>')
+        .replace(/\n/g,'<br>');
+      el.innerHTML=`<span style="font-size:10px;color:var(--blue);margin-right:6px"><i class="ti ti-sparkles" style="font-size:10px"></i> AI Defense Analysis</span><br><br>${formatted}`;
       el.classList.add('show');
     } else {
       throw new Error(d.error||'No answer');
