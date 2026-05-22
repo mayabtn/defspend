@@ -1,8 +1,8 @@
 name: Daily DefSpend Refresh
 on:
   schedule:
-    - cron: '0 7 * * *'  # tous les jours à 7h UTC
-  workflow_dispatch:      # bouton manuel aussi
+    - cron: '0 7 * * *'
+  workflow_dispatch:
 
 jobs:
   refresh:
